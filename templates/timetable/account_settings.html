@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}إعدادات الحساب{% endblock %}
+{% block page_title %}إعدادات الحساب{% endblock %}
+
+{% block extra_css %}
+<style>
+  .settings-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  .settings-card-header {
+    background: linear-gradient(135deg, #071e26, #0d5263);
+    padding: 1.4rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .settings-card-header .hdr-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #00c9b1; font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .settings-card-header h5 { color: #fff; font-weight: 800; margin: 0; }
+  .settings-card-header small { color: rgba(255,255,255,0.55); font-size: 0.78rem; }
+  .settings-card-body { padding: 2rem 1.75rem; }
+  .settings-card-footer {
+    padding: 1.2rem 1.75rem;
+    background: #f8fafc;
+    border-top: 1px solid #edf0f4;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .field-note {
+    font-size: 0.75rem;
+    color: #9ab0ba;
+    margin-top: 0.3rem;
+  }
+  .pwd-tip {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .pwd-tip .tip-icon {
+    width: 30px; height: 30px;
+    background: rgba(33,150,243,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1565c0; font-size: 0.85rem; flex-shrink: 0;
+  }
+  .pwd-tip p { color: #1565c0; font-size: 0.8rem; margin: 0; line-height: 1.6; }
+  .field-group { margin-bottom: 1.4rem; }
+  .field-group:last-child { margin-bottom: 0; }
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    color: #b0c4cc;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #edf0f4;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-user-cog"></i></div>
+    <div>
+      <h4>إعدادات الحساب</h4>
+      <div class="page-header-sub">إدارة بياناتك الشخصية وأمان حسابك</div>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-xl-7 col-lg-9">
+
+    <!-- ══ Section 1: Personal Data ══ -->
+    <div class="settings-card fade-in-up fade-in-up-1">
+      <div class="settings-card-header">
+        <div class="hdr-icon"><i class="fas fa-user-edit"></i></div>
+        <div>
+          <h5>البيانات الشخصية</h5>
+          <small>{{ request.user.get_user_type_display }} &nbsp;·&nbsp; {{ request.user.username }}</small>
+        </div>
+      </div>
+
+      <div class="settings-card-body">
+        <form method="post" novalidate id="profileForm">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="profile">
+
+          <div class="field-group">
+            <label class="form-label">
+              <i class="fas fa-id-badge me-1" style="color:#9ab0ba;"></i>اسم المستخدم
+            </label>
+            <input type="text" class="form-control" value="{{ request.user.username }}" disabled
+              style="background:#f5f8fa;color:#8a9ba5;">
+            <div class="field-note"><i class="fas fa-lock" style="font-size:0.65rem;margin-left:0.25rem;"></i>اسم المستخدم ثابت ولا يمكن تغييره</div>
+          </div>
+
+          <div class="field-group">
+            <label class="form-label" for="full_name">
+              <i class="fas fa-user me-1" style="color:#9ab0ba;"></i>الاسم الكامل <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="text" id="full_name" name="full_name"
+              value="{{ full_name|default:request.user.full_name }}"
+              class="form-control {% if profile_errors.full_name %}is-invalid{% endif %}"
+              placeholder="أدخل الاسم الكامل" autocomplete="name">
+            {% if profile_errors.full_name %}
+              <div class="invalid-feedback">{{ profile_errors.full_name }}</div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="form-label" for="email">
+              <i class="fas fa-envelope me-1" style="color:#9ab0ba;"></i>البريد الإلكتروني <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="email" id="email" name="email"
+              value="{{ email|default:request.user.email }}"
+              class="form-control {% if profile_errors.email %}is-invalid{% endif %}"
+              placeholder="أدخل البريد الإلكتروني" autocomplete="email">
+            {% if profile_errors.email %}
+              <div class="invalid-feedback">{{ profile_errors.email }}</div>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+
+      <div class="settings-card-footer">
+        <button type="submit" form="profileForm" class="btn btn-tms px-4">
+          <i class="fas fa-save me-2"></i>حفظ البيانات
+        </button>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary px-3" style="margin-right:auto;">إلغاء</a>
+      </div>
+    </div>
+
+    <!-- ══ Section 2: Change Password ══ -->
+    <div class="settings-card fade-in-up fade-in-up-2">
+      <div class="settings-card-header" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+        <div class="hdr-icon" style="color:#f5a623;"><i class="fas fa-key"></i></div>
+        <div>
+          <h5>تغيير كلمة المرور</h5>
+          <small>اترك الحقول فارغة إذا لم ترد تغيير كلمة المرور</small>
+        </div>
+      </div>
+
+      <div class="settings-card-body">
+        <div class="pwd-tip">
+          <div class="tip-icon"><i class="fas fa-shield-alt"></i></div>
+          <p>لحماية حسابك، اختر كلمة مرور قوية تحتوي على أحرف وأرقام. يجب أن تكون 6 أحرف على الأقل.</p>
+        </div>
+
+        <form method="post" novalidate id="passwordForm">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="password">
+
+          <div class="field-group">
+            <label class="form-label" for="old_password">
+              <i class="fas fa-lock me-1" style="color:#9ab0ba;"></i>كلمة المرور الحالية <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="password" id="old_password" name="old_password"
+              class="form-control {% if password_errors.old_password %}is-invalid{% endif %}"
+              placeholder="أدخل كلمة المرور الحالية" autocomplete="current-password">
+            {% if password_errors.old_password %}
+              <div class="invalid-feedback">{{ password_errors.old_password }}</div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="form-label" for="new_password">
+              <i class="fas fa-key me-1" style="color:#9ab0ba;"></i>كلمة المرور الجديدة <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="password" id="new_password" name="new_password"
+              class="form-control {% if password_errors.new_password %}is-invalid{% endif %}"
+              placeholder="أدخل كلمة المرور الجديدة" autocomplete="new-password">
+            {% if password_errors.new_password %}
+              <div class="invalid-feedback">{{ password_errors.new_password }}</div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="form-label" for="new_password2">
+              <i class="fas fa-key me-1" style="color:#9ab0ba;"></i>تأكيد كلمة المرور الجديدة <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="password" id="new_password2" name="new_password2"
+              class="form-control {% if password_errors.new_password2 %}is-invalid{% endif %}"
+              placeholder="أعد إدخال كلمة المرور الجديدة" autocomplete="new-password">
+            {% if password_errors.new_password2 %}
+              <div class="invalid-feedback">{{ password_errors.new_password2 }}</div>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+
+      <div class="settings-card-footer">
+        <button type="submit" form="passwordForm" class="btn btn-tms px-4">
+          <i class="fas fa-key me-2"></i>تغيير كلمة المرور
+        </button>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary px-3" style="margin-right:auto;">إلغاء</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

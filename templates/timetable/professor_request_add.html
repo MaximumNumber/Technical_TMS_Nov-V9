@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}طلب تغيير موعد{% endblock %}
+{% block page_title %}طلب تغيير موعد محاضرة{% endblock %}
+{% block extra_css %}
+<style>
+  .section-box { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .section-box.original { background: linear-gradient(135deg, #fce4ec, #f8d7da); border: 1px solid #f48fb1; }
+  .section-box.new { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 1px solid #a5d6a7; }
+  .section-box h6 { margin-bottom: 0.75rem; font-weight: 700; font-size: 0.88rem; }
+  .section-box.original h6 { color: #880e4f; }
+  .section-box.new h6 { color: #1b5e20; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-exchange-alt"></i></div>
+    <div><h4>طلب تغيير موعد</h4><div class="page-header-sub">إرسال طلب تغيير موعد محاضرة</div></div>
+  </div>
+  <a href="{% url 'professor_requests' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+<div class="row justify-content-center fade-in-up fade-in-up-1">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header card-header-primary"><i class="fas fa-paper-plane me-2"></i>نموذج طلب التغيير</div>
+      <div class="card-body p-4">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">المحاضرة المراد تغييرها *</label>
+            <select name="schedule_id" class="form-select" required onchange="fillOriginal(this)">
+              <option value="">اختر المحاضرة...</option>
+              {% for lec in lectures %}
+              <option value="{{ lec.pk }}"
+                data-day="{{ lec.day_of_week }}"
+                data-start="{{ lec.start_time }}"
+                data-end="{{ lec.end_time }}"
+                data-room="{{ lec.room.name }}">
+                {{ lec.course.course_name }} — {{ lec.day_of_week }} {{ lec.start_time }} - {{ lec.end_time }} ({{ lec.room.name }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="section-box original">
+            <h6><i class="fas fa-clock me-2"></i>الموعد الأصلي (للتوثيق)</h6>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <label class="form-label">اليوم الأصلي</label>
+                <select name="original_day" id="original_day" class="form-select form-select-sm">
+                  <option value="">—</option>
+                  {% for eng,ar in day_names.items %}<option value="{{ eng }}">{{ ar }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">من</label>
+                <input type="time" name="original_time_start" id="orig_start" class="form-control form-control-sm">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">إلى</label>
+                <input type="time" name="original_time_end" id="orig_end" class="form-control form-control-sm">
+              </div>
+            </div>
+          </div>
+          <div class="section-box new">
+            <h6><i class="fas fa-calendar-plus me-2"></i>الموعد الجديد المطلوب *</h6>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <label class="form-label">اليوم الجديد *</label>
+                <select name="day" class="form-select" required>
+                  <option value="">اختر اليوم...</option>
+                  {% for eng,ar in day_names.items %}<option value="{{ eng }}">{{ ar }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">من</label>
+                <input type="time" name="time_start" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">إلى</label>
+                <input type="time" name="time_end" class="form-control">
+              </div>
+              <div class="col-12">
+                <label class="form-label">القاعة المطلوبة (اختياري)</label>
+                <select name="room_id" class="form-select">
+                  <option value="">نفس القاعة أو أي قاعة</option>
+                  {% for room in rooms %}<option value="{{ room.pk }}">{{ room.name }} ({{ room.code }})</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">سبب الطلب / ملاحظات</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="اذكر سبب طلب التغيير..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-tms px-4"><i class="fas fa-paper-plane me-2"></i>إرسال الطلب</button>
+            <a href="{% url 'professor_requests' %}" class="btn btn-outline-secondary px-4">إلغاء</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function fillOriginal(sel) {
+  const opt = sel.options[sel.selectedIndex];
+  const day = opt.getAttribute("data-day");
+  const start = opt.getAttribute("data-start");
+  const end = opt.getAttribute("data-end");
+  if (day) {
+    const origDay = document.getElementById("original_day");
+    for (let o of origDay.options) { if (o.value === day) { o.selected = true; break; } }
+  }
+  if (start) document.getElementById("orig_start").value = start.substring(0,5);
+  if (end) document.getElementById("orig_end").value = end.substring(0,5);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}مركز الإشعارات{% endblock %}
+{% block page_title %}مركز الإشعارات{% endblock %}
+
+{% block extra_css %}
+<style>
+  .notif-list-item {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-right: 4px solid #e8edf2;
+    transition: all 0.22s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .notif-list-item.unread {
+    border-right-color: #17616c;
+    background: linear-gradient(135deg, #f0f8f9, #e8f6f8);
+  }
+  .notif-list-item.unread::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #17616c, #00c9b1);
+  }
+  .notif-list-item:hover { transform: translateX(-3px); box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
+  .notif-icon-wrap {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .notif-icon-wrap.unread { background: linear-gradient(135deg, #17616c, #1a7a8a); color: #fff; }
+  .notif-icon-wrap.read { background: #f0f4f8; color: #a0b8c1; }
+  .notif-content { flex: 1; min-width: 0; }
+  .notif-message { font-size: 0.88rem; color: #1a2e35; font-weight: 500; line-height: 1.5; }
+  .notif-list-item.unread .notif-message { font-weight: 600; }
+  .notif-meta { font-size: 0.72rem; color: #7a9ba5; margin-top: 0.3rem; }
+  .unread-dot {
+    width: 8px; height: 8px; background: #17616c; border-radius: 50%;
+    flex-shrink: 0; margin-top: 6px;
+  }
+  .notif-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #a0b8c1;
+  }
+  .notif-empty .empty-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #e8f6f8, #d0eef4);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem; color: #17616c; opacity: 0.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-bell"></i></div>
+    <div>
+      <h4>مركز الإشعارات</h4>
+      <div class="page-header-sub">
+        {% if unread_count > 0 %}
+          <span style="color:#17616c;font-weight:600;">{{ unread_count }} إشعار غير مقروء</span>
+        {% else %}
+          جميع الإشعارات مقروءة
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% if unread_count > 0 %}
+  <form method="post" action="{% url 'notifications_mark_read' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-tms btn-sm">
+      <i class="fas fa-check-double me-2"></i>تحديد الكل كمقروء
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="fade-in-up fade-in-up-1">
+  {% if notifications %}
+    {% for notif in notifications %}
+    <div class="notif-list-item {% if not notif.is_read %}unread{% endif %}">
+      {% if not notif.is_read %}<div class="unread-dot"></div>{% endif %}
+      <div class="notif-icon-wrap {% if not notif.is_read %}unread{% else %}read{% endif %}">
+        <i class="fas fa-bell"></i>
+      </div>
+      <div class="notif-content">
+        <div class="notif-message">{{ notif.message }}</div>
+        <div class="notif-meta">
+          <i class="fas fa-clock me-1"></i>
+          {{ notif.created_at|date:"Y-m-d H:i" }}
+          {% if notif.is_read %} · <i class="fas fa-check-double me-1" style="color:#2ecc71;"></i>مقروء{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="notif-empty">
+      <div class="empty-icon"><i class="fas fa-bell-slash"></i></div>
+      <div style="font-size:1.1rem;font-weight:700;color:#5a7a84;margin-bottom:0.4rem;">لا توجد إشعارات</div>
+      <div style="font-size:0.85rem;">ستظهر هنا إشعاراتك الجديدة عند وصولها</div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}تعديل الملف الشخصي{% endblock %}
+{% block page_title %}تعديل الملف الشخصي{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+    overflow: hidden;
+  }
+  .profile-header {
+    background: linear-gradient(135deg, #071e26, #0d5263);
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  .profile-header .ph-avatar {
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,0.14);
+    border: 2px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: #00c9b1; font-size: 1.4rem; font-weight: 900;
+    flex-shrink: 0;
+  }
+  .profile-header h5 { color: #fff; font-weight: 800; margin: 0 0 0.2rem; }
+  .profile-header small { color: rgba(255,255,255,0.5); font-size: 0.78rem; }
+  .profile-body { padding: 2rem 1.75rem; }
+  .profile-footer {
+    padding: 1.25rem 1.75rem;
+    background: #f8fafc;
+    border-top: 1px solid #edf0f4;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .field-note {
+    font-size: 0.75rem;
+    color: #9ab0ba;
+    margin-top: 0.3rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-user-edit"></i></div>
+    <div>
+      <h4>تعديل الملف الشخصي</h4>
+      <div class="page-header-sub">إعدادات الحساب الشخصي</div>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-xl-6 col-lg-8">
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-right:4px solid #16a34a;border-radius:14px;padding:0.85rem 1.1rem;color:#15803d;font-weight:600;font-size:0.88rem;display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;" class="fade-in-up">
+          <i class="fas fa-check-circle"></i> {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="profile-card fade-in-up fade-in-up-1">
+      <div class="profile-header">
+        <div class="ph-avatar">{{ request.user.full_name|first|upper|default:"U" }}</div>
+        <div>
+          <h5>{{ request.user.full_name }}</h5>
+          <small>{{ request.user.get_user_type_display }} &nbsp;·&nbsp; {{ request.user.username }}</small>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <form method="post" novalidate id="profileForm">
+          {% csrf_token %}
+
+          <div style="margin-bottom:1.4rem;">
+            <label class="form-label">
+              <i class="fas fa-id-badge me-1" style="color:#9ab0ba;"></i>اسم المستخدم
+            </label>
+            <input type="text" class="form-control" value="{{ request.user.username }}" disabled
+              style="background:#f5f8fa;color:#8a9ba5;">
+            <div class="field-note"><i class="fas fa-lock" style="font-size:0.65rem;margin-left:0.25rem;"></i>اسم المستخدم ثابت ولا يمكن تغييره</div>
+          </div>
+
+          <div style="margin-bottom:1.4rem;">
+            <label class="form-label" for="full_name">
+              <i class="fas fa-user me-1" style="color:#9ab0ba;"></i>الاسم الكامل <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="text" id="full_name" name="full_name"
+              value="{{ full_name|default:request.user.full_name }}"
+              class="form-control {% if errors.full_name %}is-invalid{% endif %}"
+              placeholder="أدخل الاسم الكامل" autocomplete="name">
+            {% if errors.full_name %}
+              <div class="invalid-feedback">{{ errors.full_name }}</div>
+            {% endif %}
+          </div>
+
+          <div style="margin-bottom:0.5rem;">
+            <label class="form-label" for="email">
+              <i class="fas fa-envelope me-1" style="color:#9ab0ba;"></i>البريد الإلكتروني <span style="color:#ef4444;">*</span>
+            </label>
+            <input type="email" id="email" name="email"
+              value="{{ email|default:request.user.email }}"
+              class="form-control {% if errors.email %}is-invalid{% endif %}"
+              placeholder="أدخل البريد الإلكتروني" autocomplete="email">
+            {% if errors.email %}
+              <div class="invalid-feedback">{{ errors.email }}</div>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+
+      <div class="profile-footer">
+        <button type="submit" form="profileForm" class="btn btn-tms px-4">
+          <i class="fas fa-save me-2"></i>حفظ التغييرات
+        </button>
+        <a href="{% url 'change_password' %}" class="btn btn-outline-secondary px-4">
+          <i class="fas fa-key me-2"></i>تغيير كلمة المرور
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary px-3" style="margin-right:auto;">إلغاء</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

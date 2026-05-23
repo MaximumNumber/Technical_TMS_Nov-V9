@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}المعامل{% endblock %}
+{% block page_title %}إدارة المعامل{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,#e67e22,#f39c12);"><i class="fas fa-flask"></i></div>
+    <div><h4>معامل {{ college.name }}</h4><div class="page-header-sub">إدارة المعامل المتاحة</div></div>
+  </div>
+  <a href="{% url 'cm_hall_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i>معمل جديد</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="card-header card-header-primary">المعامل المتاحة للكلية</div>
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم المعمل</th><th>الرمز</th><th>السعة</th><th>الكلية الأصلية</th><th>النوع</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for ch in college_halls %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ ch.hall.name }}</span></td>
+          <td><span class="chip">{{ ch.hall.code }}</span></td>
+          <td><span class="badge-tms badge-warning-soft">{{ ch.hall.capacity }} مقعد</span></td>
+          <td style="font-size:0.82rem;">{{ ch.hall.college.name }}</td>
+          <td>
+            {% if ch.relation_type == "owner" %}<span class="badge-tms badge-success-soft">مالك</span>
+            {% else %}<span class="badge-tms badge-info-soft">مشارك</span>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              {% if ch.relation_type == "owner" %}
+              <a href="{% url 'cm_hall_edit' ch.hall.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'cm_hall_remove' ch.hall.pk %}" class="btn btn-icon btn-outline-danger" title="إزالة"><i class="fas fa-trash"></i></a>
+              {% else %}
+              <span class="text-muted small">مشارك فقط</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-flask"></i><p>لا توجد معامل</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

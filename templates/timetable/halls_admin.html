@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}المعامل{% endblock %}
+{% block page_title %}إدارة المعامل{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,#e67e22,#f39c12);"><i class="fas fa-flask"></i></div>
+    <div><h4>المعامل</h4><div class="page-header-sub">إدارة معامل الجامعة</div></div>
+  </div>
+  <a href="{% url 'hall_add_admin' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i> إضافة معمل</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم المعمل</th><th>الرمز</th><th>السعة</th><th>الكلية</th><th style="width:120px;">الإجراءات</th></tr></thead>
+      <tbody>
+        {% for hall in halls %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ hall.name }}</span></td>
+          <td><span class="chip">{{ hall.code }}</span></td>
+          <td><span class="badge-tms badge-warning-soft">{{ hall.capacity }} مقعد</span></td>
+          <td>{{ hall.college.name }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'hall_edit_admin' hall.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'hall_delete_admin' hall.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><i class="fas fa-flask"></i><p>لا توجد معامل</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

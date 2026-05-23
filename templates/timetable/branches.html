@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}الفروع{% endblock %}
+{% block page_title %}إدارة الفروع{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-code-branch"></i></div>
+    <div><h4>الفروع</h4><div class="page-header-sub">إدارة فروع الجامعات</div></div>
+  </div>
+  <a href="{% url 'branch_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i> إضافة فرع</a>
+</div>
+{% if universities %}
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2 d-flex gap-2 align-items-center flex-wrap">
+    <span style="font-size:0.8rem;color:#7a9ba5;font-weight:600;">تصفية:</span>
+    <a href="{% url 'branch_list' %}" class="btn btn-xs {% if not selected_university %}btn-tms{% else %}btn-outline-secondary{% endif %}">الكل</a>
+    {% for uni in universities %}
+    <a href="{% url 'branch_list' %}?university_id={{ uni.pk }}" class="btn btn-xs {% if selected_university == uni.pk|stringformat:'s' %}btn-tms{% else %}btn-outline-secondary{% endif %}">{{ uni.name }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم الفرع</th><th>الجامعة</th><th>النوع</th><th style="width:120px;">الإجراءات</th></tr></thead>
+      <tbody>
+        {% for branch in branches %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#e8f6f8,#d0eef4);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#17616c;font-size:0.85rem;flex-shrink:0;"><i class="fas fa-code-branch"></i></div>
+              <span class="fw-semibold" style="color:#0d5263;">{{ branch.name }}</span>
+            </div>
+          </td>
+          <td>{{ branch.university.name }}</td>
+          <td>
+            {% if branch.is_main %}<span class="badge-tms badge-success-soft">رئيسي</span>
+            {% else %}<span class="badge-tms badge-info-soft">فرعي</span>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'branch_edit' branch.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'branch_delete' branch.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-code-branch"></i><p>لا توجد فروع. <a href="{% url 'branch_add' %}" style="color:#17616c;">أضف أول فرع</a></p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

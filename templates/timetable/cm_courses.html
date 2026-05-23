@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}المواد الدراسية{% endblock %}
+{% block page_title %}المواد الدراسية{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-book"></i></div>
+    <div><h4>المواد الدراسية</h4><div class="page-header-sub">إدارة المقررات والمواد</div></div>
+  </div>
+  <a href="{% url 'cm_course_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i>إضافة مادة</a>
+</div>
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2">
+    <form method="get" class="d-flex gap-2 align-items-end flex-wrap">
+      <div>
+        <label class="form-label" style="font-size:0.78rem;">القسم</label>
+        <select name="dept_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">كل الأقسام</option>
+          {% for dept in departments %}
+          <option value="{{ dept.pk }}" {% if selected_dept == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if selected_dept %}
+      <a href="{% url 'cm_course_list' %}" class="btn btn-xs btn-outline-danger align-self-end">إلغاء التصفية</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم المادة</th><th>الرمز</th><th>القسم</th><th>الساعات</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for course in courses %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ course.course_name }}</span></td>
+          <td><span class="chip">{{ course.course_code|default:"—" }}</span></td>
+          <td style="font-size:0.82rem;">{{ course.department.name }}</td>
+          <td><span class="badge-tms badge-primary">{{ course.credit_hours|default:"—" }}</span></td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'cm_course_edit' course.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'cm_course_delete' course.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><i class="fas fa-book"></i><p>لا توجد مواد دراسية</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

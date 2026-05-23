@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load timetable_tags %}
+{% block title %}تقرير جدول القاعة{% endblock %}
+{% block page_title %}تقرير جدول القاعة{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-door-open"></i></div>
+    <div><h4>تقرير جدول القاعة</h4><div class="page-header-sub">عرض الجدول الكامل لقاعة محددة</div></div>
+  </div>
+</div>
+<div class="card mb-4 fade-in-up">
+  <div class="card-body">
+    <form method="get" class="d-flex gap-3 align-items-end flex-wrap">
+      <div style="flex:1;min-width:250px;">
+        <label class="form-label">اختر القاعة</label>
+        <select name="room_id" class="form-select">
+          <option value="">اختر قاعة...</option>
+          {% for r in rooms %}
+          <option value="{{ r.pk }}" {% if room and room.pk == r.pk %}selected{% endif %}>
+            {{ r.name }} ({{ r.code }}) — {{ r.capacity }} مقعد
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-tms"><i class="fas fa-search me-1"></i>عرض الجدول</button>
+    </form>
+  </div>
+</div>
+{% if room %}
+<div class="card mb-4 fade-in-up fade-in-up-1" style="border-right:4px solid #17616c;">
+  <div class="card-body py-2">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#17616c,#1a7a8a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;"><i class="fas fa-door-open"></i></div>
+      <div>
+        <div style="font-weight:800;color:#0a3341;font-size:1rem;">{{ room.name }}</div>
+        <div style="font-size:0.8rem;color:#7a9ba5;">{{ room.code }} — {{ room.capacity }} مقعد — {{ room.college.name }}</div>
+      </div>
+      <div class="ms-auto">
+        <span class="badge-tms badge-primary">{{ lectures|length }} محاضرة</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card fade-in-up fade-in-up-2" style="border-radius:18px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#0a3341,#17616c);padding:1rem 1.25rem;">
+    <div style="color:#fff;font-weight:700;"><i class="fas fa-table me-2" style="color:#00c9b1;"></i>الجدول الأسبوعي للقاعة</div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-bordered schedule-table mb-0" style="background:#fafcfe;">
+      <thead><tr>{% for day in day_order %}<th class="text-center">{{ day_names|get_item:day }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        <tr>
+          {% for day in day_order %}
+          <td class="align-top p-2" style="min-width:130px;">
+            {% for lec in schedule_grid|get_item:day %}
+            <div class="lecture-block">
+              <div style="font-weight:700;color:#0a3d47;font-size:0.8rem;">{{ lec.course.course_name }}</div>
+              <div style="font-size:0.7rem;color:#4a7a84;"><i class="fas fa-user-tie" style="font-size:0.6rem;"></i> {{ lec.professor.name }}</div>
+              <div style="font-size:0.7rem;color:#4a7a84;"><i class="fas fa-clock" style="font-size:0.6rem;"></i> {{ lec.start_time|time:"H:i" }}-{{ lec.end_time|time:"H:i" }}</div>
+            </div>
+            {% empty %}
+            <div class="text-center py-2" style="color:#c5d5db;font-size:0.78rem;">فارغ</div>
+            {% endfor %}
+          </td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

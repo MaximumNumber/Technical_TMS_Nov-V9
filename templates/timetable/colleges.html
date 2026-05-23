@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}الكليات{% endblock %}
+{% block page_title %}إدارة الكليات{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-building"></i></div>
+    <div><h4>الكليات</h4><div class="page-header-sub">إدارة الكليات الأكاديمية</div></div>
+  </div>
+  <a href="{% url 'college_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i> إضافة كلية</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم الكلية</th><th>الرمز</th><th>الفرع</th><th>الجامعة</th><th style="width:120px;">الإجراءات</th></tr></thead>
+      <tbody>
+        {% for college in colleges %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#e8f6f8,#d0eef4);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#17616c;font-size:0.85rem;flex-shrink:0;"><i class="fas fa-building"></i></div>
+              <span class="fw-semibold" style="color:#0d5263;">{{ college.name }}</span>
+            </div>
+          </td>
+          <td><span class="chip">{{ college.code }}</span></td>
+          <td>{{ college.branch.name }}</td>
+          <td>{{ college.branch.university.name }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'college_edit' college.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'college_delete' college.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><i class="fas fa-building"></i><p>لا توجد كليات. <a href="{% url 'college_add' %}" style="color:#17616c;">أضف أول كلية</a></p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

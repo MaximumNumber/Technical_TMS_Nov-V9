@@ -1,0 +1,322 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} — إدارة نظام الجداول الدراسية{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">
+    🎓 &nbsp;نظام الجداول الدراسية — لوحة الإدارة
+  </a>
+</h1>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #17616c;
+    --primary-dk:  #093347;
+    --accent:      #00cdb8;
+    --gold:        #f5a623;
+    --danger:      #ef4444;
+    --success:     #22c55e;
+    --sidebar-bg:  linear-gradient(175deg, #020c12 0%, #061b24 40%, #093347 70%);
+    --sidebar-txt: rgba(255,255,255,0.7);
+    --radius:      12px;
+    --transition:  0.22s cubic-bezier(.4,0,.2,1);
+  }
+
+  * { box-sizing: border-box; }
+  body, #content, .colMS, .colM {
+    font-family: 'Tajawal', 'Segoe UI', sans-serif !important;
+    direction: rtl;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    background: linear-gradient(135deg, #020c12, #093347, #17616c) !important;
+    border-bottom: 2px solid rgba(0,205,184,0.25) !important;
+    padding: 0 2rem !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+  }
+
+  #site-name a {
+    color: #fff !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  #user-tools {
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    color: rgba(255,255,255,0.6) !important;
+  }
+  #user-tools a {
+    color: var(--accent) !important;
+    text-decoration: none !important;
+    transition: color var(--transition) !important;
+    font-weight: 700 !important;
+    padding: 0.3rem 0.6rem !important;
+    border-radius: 8px !important;
+    border: 1px solid transparent !important;
+  }
+  #user-tools a:hover {
+    color: #fff !important;
+    background: rgba(0,205,184,0.12) !important;
+    border-color: rgba(0,205,184,0.2) !important;
+  }
+
+  /* ── BREADCRUMBS ── */
+  #breadcrumbs {
+    background: #f0f3f8 !important;
+    border-bottom: 1px solid rgba(15,55,75,0.08) !important;
+    padding: 0.6rem 2rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    color: #6a8a94 !important;
+  }
+  #breadcrumbs a { color: var(--primary) !important; text-decoration: none !important; font-weight: 700 !important; }
+  #breadcrumbs a:hover { color: #1a8a9a !important; }
+
+  /* ── SIDEBAR / NAV ── */
+  #nav-sidebar {
+    background: var(--sidebar-bg) !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.2) !important;
+    min-width: 240px !important;
+  }
+  .module h2, .module caption, .inline-group h2 {
+    background: linear-gradient(135deg, var(--primary-dk), var(--primary)) !important;
+    color: #fff !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    padding: 0.75rem 1.1rem !important;
+    border-radius: var(--radius) var(--radius) 0 0 !important;
+    letter-spacing: 0.3px !important;
+    border: none !important;
+  }
+
+  /* ── CONTENT AREA ── */
+  #content {
+    background: #eef1f6 !important;
+    padding: 1.75rem 2rem !important;
+    min-height: calc(100vh - 60px) !important;
+  }
+  #content-main {
+    max-width: 1200px !important;
+  }
+
+  /* ── MODULES / CARDS ── */
+  .module {
+    background: #fff !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.06) !important;
+    border: 1px solid rgba(15,55,75,0.08) !important;
+    overflow: hidden !important;
+    margin-bottom: 1.5rem !important;
+  }
+  .module table { border-radius: 0 !important; }
+  .module td, .module th {
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.86rem !important;
+    padding: 0.75rem 1rem !important;
+    border-color: rgba(15,55,75,0.06) !important;
+  }
+  .module th {
+    background: #f7f9fc !important;
+    font-weight: 700 !important;
+    color: #4a6872 !important;
+  }
+  .module tr:hover { background: rgba(23,97,108,0.03) !important; }
+
+  /* ── LINKS IN TABLES ── */
+  .module a, th a {
+    color: var(--primary) !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+  }
+  .module a:hover { color: #1a8a9a !important; }
+
+  /* ── CHANGE LIST ── */
+  #changelist-filter {
+    background: #fff !important;
+    border-right: 1px solid rgba(15,55,75,0.08) !important;
+    padding: 1rem !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05) !important;
+  }
+  #changelist-filter h2 {
+    background: linear-gradient(135deg, var(--primary-dk), var(--primary)) !important;
+    border-radius: 10px 10px 0 0 !important;
+    font-size: 0.78rem !important;
+    padding: 0.6rem 0.9rem !important;
+  }
+  #changelist-filter h3 {
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #4a6872 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+  }
+  #changelist-filter ul { list-style: none !important; padding: 0 !important; }
+  #changelist-filter li a {
+    font-size: 0.82rem !important;
+    padding: 0.3rem 0 !important;
+    display: block !important;
+    color: #5a7a84 !important;
+    font-weight: 600 !important;
+    transition: color var(--transition) !important;
+  }
+  #changelist-filter li.selected a { color: var(--primary) !important; font-weight: 800 !important; }
+  #changelist-filter li a:hover { color: #1a8a9a !important; }
+
+  /* ── PAGINATION ── */
+  .paginator {
+    background: #fff !important;
+    border-radius: var(--radius) !important;
+    padding: 0.75rem 1rem !important;
+    border: 1px solid rgba(15,55,75,0.08) !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+  }
+  .paginator a {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 0.3rem 0.8rem !important;
+    text-decoration: none !important;
+    transition: all var(--transition) !important;
+  }
+  .paginator a:hover { background: #1a8a9a !important; }
+
+  /* ── BUTTONS ── */
+  .button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: linear-gradient(135deg, var(--primary), #1a8a9a) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 1.4rem !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all var(--transition) !important;
+    box-shadow: 0 4px 12px rgba(23,97,108,0.28) !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+  }
+  .button:hover, input[type=submit]:hover, a.button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(23,97,108,0.4) !important;
+    color: #fff !important;
+  }
+  .button.default, input[type=submit].default {
+    background: linear-gradient(135deg, var(--primary), #1a8a9a) !important;
+  }
+
+  .deletelink, .deletelink-box a {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.25) !important;
+  }
+  .deletelink:hover { box-shadow: 0 6px 18px rgba(220,38,38,0.4) !important; }
+
+  /* ── FORMS ── */
+  .form-row {
+    border-bottom: 1px solid rgba(15,55,75,0.06) !important;
+    padding: 1rem 1.25rem !important;
+  }
+  .form-row:last-child { border-bottom: none !important; }
+  input[type=text], input[type=password], input[type=email], input[type=number],
+  input[type=url], textarea, select, .vTextField {
+    border: 2px solid rgba(15,55,75,0.12) !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 0.9rem !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.88rem !important;
+    color: #093347 !important;
+    background: rgba(255,255,255,0.9) !important;
+    transition: all var(--transition) !important;
+  }
+  input[type=text]:focus, input[type=password]:focus, input[type=email]:focus,
+  textarea:focus, select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(23,97,108,0.1) !important;
+    outline: none !important;
+    background: #fff !important;
+  }
+  label, .required { font-family: 'Tajawal', sans-serif !important; font-weight: 700 !important; font-size: 0.82rem !important; color: #4a6872 !important; }
+
+  /* ── SUBMIT ROW ── */
+  .submit-row {
+    background: #f7f9fc !important;
+    border-top: 1px solid rgba(15,55,75,0.08) !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: 0 0 var(--radius) var(--radius) !important;
+    display: flex !important;
+    gap: 0.6rem !important;
+    align-items: center !important;
+  }
+
+  /* ── ALERTS / MESSAGES ── */
+  .messagelist li {
+    border-radius: 10px !important;
+    padding: 0.8rem 1.1rem !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.65rem !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    border-right: 4px solid !important;
+  }
+  .messagelist li.success { background: #f0fdf4 !important; color: #166534 !important; border-right-color: #22c55e !important; }
+  .messagelist li.warning { background: #fffbeb !important; color: #92400e !important; border-right-color: #f59e0b !important; }
+  .messagelist li.error   { background: #fff5f5 !important; color: #991b1b !important; border-right-color: #ef4444 !important; }
+
+  /* ── SEARCH ── */
+  #searchbar { border-radius: 10px !important; border: 2px solid rgba(15,55,75,0.12) !important; padding: 0.5rem 0.9rem !important; font-family: 'Tajawal', sans-serif !important; }
+  #searchbar:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(23,97,108,0.1) !important; outline: none !important; }
+
+  /* ── RECENT ACTIONS ── */
+  #recent-actions-module { border-radius: var(--radius) !important; }
+  #recent-actions-module ul li { font-family: 'Tajawal', sans-serif !important; font-size: 0.84rem !important; padding: 0.4rem 0 !important; border-bottom: 1px solid rgba(15,55,75,0.05) !important; }
+  #recent-actions-module ul li:last-child { border-bottom: none !important; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent), var(--primary)); border-radius: 99px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 767px) {
+    #content { padding: 1rem !important; }
+    #header { padding: 0 1rem !important; }
+  }
+</style>
+{% endblock %}
+
+{% block footer %}
+<div id="footer" style="background:linear-gradient(135deg,#020c12,#093347);border-top:1px solid rgba(0,205,184,0.15);color:rgba(255,255,255,0.35);font-family:'Tajawal',sans-serif;font-size:0.72rem;text-align:center;padding:0.75rem;">
+  &copy; 2025 جامعة السودان للعلوم والتكنولوجيا &mdash; نظام إدارة الجداول الدراسية
+</div>
+{% endblock %}

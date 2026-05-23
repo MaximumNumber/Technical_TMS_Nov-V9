@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}طلبات تغيير المواعيد{% endblock %}
+{% block page_title %}طلبات تغيير المواعيد{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-exchange-alt"></i></div>
+    <div><h4>طلبات تغيير المواعيد</h4><div class="page-header-sub">مراجعة وإدارة طلبات الأساتذة</div></div>
+  </div>
+</div>
+
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2 d-flex gap-2 align-items-center flex-wrap">
+    <span style="font-size:0.8rem;color:#7a9ba5;font-weight:600;">تصفية:</span>
+    <button onclick="filterRequests('')" class="btn btn-xs {% if not status_filter %}btn-tms{% else %}btn-outline-secondary{% endif %}" id="filter-all">الكل</button>
+    <button onclick="filterRequests('pending')" class="btn btn-xs {% if status_filter == 'pending' %}btn-tms{% else %}btn-outline-secondary{% endif %}" id="filter-pending">قيد الانتظار</button>
+    <button onclick="filterRequests('approved')" class="btn btn-xs {% if status_filter == 'approved' %}btn-tms{% else %}btn-outline-secondary{% endif %}" id="filter-approved">موافق عليها</button>
+    <button onclick="filterRequests('rejected')" class="btn btn-xs {% if status_filter == 'rejected' %}btn-tms{% else %}btn-outline-secondary{% endif %}" id="filter-rejected">مرفوضة</button>
+    <span id="requestsCount" class="badge-tms badge-primary ms-2" style="{% if not status_filter %}display:none{% endif %}"></span>
+  </div>
+</div>
+
+<div class="card fade-in-up fade-in-up-1" id="requestsCard">
+  <div class="table-wrap" id="requestsTableWrap">
+    {% include 'timetable/cm_requests_table.html' %}
+  </div>
+</div>
+
+<!-- Notes / Review Modal -->
+<div class="modal fade" id="decideModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;font-family:'Tajawal',sans-serif;">
+      <div class="modal-header" id="decideModalHeader" style="border-radius:16px 16px 0 0;">
+        <h6 class="modal-title fw-800" id="decideModalTitle"></h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="decideRequestInfo" class="mb-3 p-3 rounded" style="background:#f8fafc;font-size:0.85rem;"></div>
+        <label style="font-size:0.85rem;font-weight:600;color:#4a6070;margin-bottom:6px;">ملاحظات (اختياري)</label>
+        <textarea id="decideNotes" class="form-control form-control-sm" rows="3" placeholder="أضف ملاحظاتك هنا..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-sm" id="decideConfirmBtn" onclick="submitDecision()"></button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let pendingPk = null, pendingAction = null, currentFilter = '{{ status_filter }}';
+const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+function filterRequests(status) {
+  currentFilter = status;
+  const url = '{% url "cm_requests_list" %}' + (status ? '?status=' + status : '');
+  window.history.pushState({}, '', url);
+
+  ['all','pending','approved','rejected'].forEach(f => {
+    const btn = document.getElementById('filter-' + f);
+    if (btn) {
+      const match = (f === 'all' && !status) || f === status;
+      btn.className = 'btn btn-xs ' + (match ? 'btn-tms' : 'btn-outline-secondary');
+    }
+  });
+
+  fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('requestsTableWrap').innerHTML = data.html;
+      const badge = document.getElementById('requestsCount');
+      if (status && data.count > 0) {
+        badge.textContent = data.count + ' طلب';
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    })
+    .catch(() => window.location.href = url);
+}
+
+function openDecide(pk, action, profName, courseName) {
+  pendingPk = pk; pendingAction = action;
+  const isApprove = action === 'approve';
+  const hdr = document.getElementById('decideModalHeader');
+  hdr.style.background = isApprove
+    ? 'linear-gradient(135deg,#1e8449,#27ae60)'
+    : 'linear-gradient(135deg,#922b21,#e74c3c)';
+  hdr.style.color = '#fff';
+  document.getElementById('decideModalTitle').textContent = isApprove ? 'الموافقة على الطلب' : 'رفض الطلب';
+  document.getElementById('decideRequestInfo').innerHTML =
+    `<strong>الأستاذ:</strong> ${profName}<br><strong>المادة:</strong> ${courseName}`;
+  document.getElementById('decideNotes').value = '';
+  const btn = document.getElementById('decideConfirmBtn');
+  btn.textContent = isApprove ? 'تأكيد الموافقة' : 'تأكيد الرفض';
+  btn.className = `btn btn-sm ${isApprove ? 'btn-success' : 'btn-danger'}`;
+  new bootstrap.Modal(document.getElementById('decideModal')).show();
+}
+
+function submitDecision() {
+  if (!pendingPk || !pendingAction) return;
+  const btn = document.getElementById('decideConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+  const notes = document.getElementById('decideNotes').value;
+  const url = `/cm/requests/${pendingPk}/${pendingAction}/`;
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: `admin_notes=${encodeURIComponent(notes)}`
+  }).then(r => r.json()).then(data => {
+    bootstrap.Modal.getInstance(document.getElementById('decideModal'))?.hide();
+    if (data.success) {
+      showToast(data.message, pendingAction === 'approve' ? 'success' : 'danger');
+      setTimeout(() => filterRequests(currentFilter), 500);
+    }
+    btn.disabled = false;
+  }).catch(() => {
+    btn.disabled = false;
+    window.location.reload();
+  });
+}
+
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = `alert alert-${type} alert-dismissible fade show`;
+  toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;min-width:300px;font-family:Tajawal,sans-serif;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+  toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'times-circle'} me-2"></i>${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+window.addEventListener('popstate', () => {
+  const status = new URLSearchParams(window.location.search).get('status') || '';
+  filterRequests(status);
+});
+</script>
+{% endblock %}

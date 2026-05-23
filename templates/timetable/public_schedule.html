@@ -1,0 +1,598 @@
+{% load timetable_tags %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الجدول الدراسي - جامعة السودان للعلوم والتكنولوجيا</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Tajawal', sans-serif; background: #f0f4f8; margin: 0; color: #1a2e35; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #b0c4ce; border-radius: 10px; }
+
+    .pub-header {
+      background: linear-gradient(135deg, #071e26 0%, #0a3341 40%, #17616c 100%);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+    .pub-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .pub-brand { display: flex; align-items: center; gap: 0.85rem; }
+    .pub-brand .brand-logo {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #00c9b1, #0097a7);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 4px 12px rgba(0,201,177,0.3);
+    }
+    .pub-brand .brand-text .brand-title { color: #fff; font-weight: 800; font-size: 1rem; }
+    .pub-brand .brand-text .brand-sub { color: rgba(255,255,255,0.55); font-size: 0.72rem; }
+    .pub-nav-links { display: flex; gap: 0.5rem; align-items: center; }
+    .pub-nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .pub-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .pub-nav-links .btn-login-link {
+      background: linear-gradient(135deg, #00c9b1, #0097a7);
+      color: #fff !important;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(0,201,177,0.3);
+    }
+    .pub-nav-links .btn-dashboard-link {
+      background: linear-gradient(135deg, #17616c, #0097a7);
+      color: #fff !important;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(23,97,108,0.3);
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+
+    .pub-hero {
+      background: linear-gradient(135deg, #071e26, #0a3341);
+      padding: 2.5rem 0;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .pub-hero h2 { color: #fff; font-weight: 900; font-size: 2rem; margin-bottom: 0.5rem; }
+    .pub-hero h2 span { color: #00c9b1; }
+    .pub-hero p { color: rgba(255,255,255,0.55); font-size: 0.9rem; margin: 0; }
+
+    .filters-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .filters-card .filter-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #4a6872;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-select {
+      border: 2px solid #dce5ee;
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.88rem;
+      color: #1a2e35;
+      background-color: #f8fbfd;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    .form-select:focus {
+      outline: none;
+      border-color: #17616c;
+      box-shadow: 0 0 0 3px rgba(23,97,108,0.12);
+      background-color: #fff;
+    }
+    .form-select:disabled {
+      background-color: #f0f4f8;
+      color: #8a9aa5;
+      cursor: not-allowed;
+    }
+
+    .btn-reset {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      border: 2px solid #dce5ee;
+      border-radius: 10px;
+      background: #fff;
+      color: #4a7a84;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-reset:hover {
+      background: #f0f4f8;
+      border-color: #17616c;
+      color: #17616c;
+    }
+
+    .download-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .download-bar .dl-label {
+      color: #4a7a84;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .download-bar .dl-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-dl-csv  { border: 1.5px solid #2e7d32; color: #2e7d32; background: #f1fdf2; }
+    .btn-dl-xlsx { border: 1.5px solid #1565c0; color: #1565c0; background: #f0f4fd; }
+    .btn-dl-pdf  { border: 1.5px solid #b71c1c; color: #b71c1c; background: #fdf1f0; }
+    .btn-dl-csv:hover  { background: #2e7d32; color: #fff; box-shadow: 0 3px 10px rgba(46,125,50,0.25); }
+    .btn-dl-xlsx:hover { background: #1565c0; color: #fff; box-shadow: 0 3px 10px rgba(21,101,192,0.25); }
+    .btn-dl-pdf:hover  { background: #b71c1c; color: #fff; box-shadow: 0 3px 10px rgba(183,28,28,0.25); }
+
+    .schedule-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 1.75rem;
+    }
+    .schedule-card-header {
+      background: linear-gradient(135deg, #0a3341, #17616c);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .schedule-card-header h6 { color: #fff; font-weight: 700; margin: 0; font-size: 0.9rem; }
+    .schedule-card-header .schedule-count {
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .schedule-table th {
+      background: #0a3341;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 0.85rem 0.5rem;
+      border: none;
+    }
+    .schedule-table td {
+      vertical-align: top;
+      padding: 0.5rem;
+      border-color: #edf2f7;
+      background: #fafcfe;
+    }
+    .schedule-table tr:hover td { background: #f5f9fb; }
+    .lecture-block {
+      background: linear-gradient(135deg, #e8f6f8, #d0eef4);
+      border-right: 3px solid #17616c;
+      border-radius: 9px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .lecture-block .lc-name { font-weight: 700; color: #0a3d47; margin-bottom: 2px; }
+    .lecture-block .lc-meta { font-size: 0.7rem; color: #4a7a84; }
+    .lab-block {
+      background: linear-gradient(135deg, #fff8e7, #fdebd0);
+      border-right: 3px solid #f5a623;
+      border-radius: 9px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .lab-block .lb-name { font-weight: 700; color: #7a4500; margin-bottom: 2px; }
+    .lab-block .lb-meta { font-size: 0.7rem; color: #8a6020; }
+    .empty-cell { text-align: center; padding: 1.5rem 0.5rem; color: #c5d5db; font-size: 0.8rem; }
+
+    .pub-empty-state {
+      text-align: center;
+      padding: 5rem 1rem;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .pub-empty-state .pes-icon {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, #e8f6f8, #d0eef4);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2.2rem;
+      color: #17616c;
+      opacity: 0.6;
+    }
+    .pub-empty-state h5 { color: #0a3341; font-weight: 800; margin-bottom: 0.4rem; }
+    .pub-empty-state p { color: #7a9ba5; font-size: 0.88rem; }
+
+    .pub-footer {
+      background: #071e26;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.78rem;
+      margin-top: 3rem;
+    }
+    .pub-footer strong { color: #00c9b1; }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+    }
+    .loading-spinner .spinner-border { color: #17616c; width: 2.5rem; height: 2.5rem; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .anim { animation: fadeInUp 0.4s ease; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="pub-header">
+  <div class="pub-header-inner">
+    <div class="pub-brand">
+      <div class="brand-logo">🎓</div>
+      <div class="brand-text">
+        <div class="brand-title">نظام الجداول الدراسية</div>
+        <div class="brand-sub">جامعة السودان للعلوم والتكنولوجيا</div>
+      </div>
+    </div>
+    <div class="pub-nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'home' %}" class="btn-dashboard-link">
+          <i class="fas fa-th-large"></i> لوحة التحكم
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn-login-link">
+          <i class="fas fa-sign-in-alt me-1"></i> تسجيل الدخول
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="pub-hero">
+  <div class="container">
+    <h2>الجدول <span>الدراسي</span></h2>
+    <p>اختر الكلية والقسم والفترة الأكاديمية لعرض الجدول الأسبوعي</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <!-- Filters -->
+  <div class="filters-card anim">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3 col-sm-6">
+        <div class="filter-title"><i class="fas fa-building me-1"></i>الكلية</div>
+        <select id="collegeSelect" class="form-select">
+          <option value="">اختر الكلية...</option>
+          {% for college in colleges %}
+          <option value="{{ college.pk }}">{{ college.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="filter-title"><i class="fas fa-sitemap me-1"></i>القسم</div>
+        <select id="deptSelect" class="form-select" disabled>
+          <option value="">اختر القسم...</option>
+        </select>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="filter-title"><i class="fas fa-calendar me-1"></i>السنة والفصل</div>
+        <select id="periodSelect" class="form-select" disabled>
+          <option value="">اختر الفترة...</option>
+        </select>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <button type="button" class="btn-reset" onclick="resetFilters()">
+          <i class="fas fa-redo"></i> إعادة التعيين
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Bar (hidden until period selected) -->
+  <div id="downloadBar" class="download-bar anim" style="display:none;">
+    <div class="dl-label">
+      <i class="fas fa-download" style="color:#17616c;"></i>
+      تنزيل الجدول:
+    </div>
+    <div class="dl-btns">
+      <a id="csvLink" href="#" class="btn-dl btn-dl-csv" target="_blank" rel="noopener"><i class="fas fa-file-csv"></i> CSV</a>
+      <a id="xlsxLink" href="#" class="btn-dl btn-dl-xlsx" target="_blank" rel="noopener"><i class="fas fa-file-excel"></i> Excel</a>
+      <a id="pdfLink" href="#" class="btn-dl btn-dl-pdf" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> PDF</a>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner-border" role="status"></div>
+    <p class="mt-3 text-muted">جاري تحميل الجدول...</p>
+  </div>
+
+  <!-- Schedule Area (dynamically rendered) -->
+  <div id="scheduleArea"></div>
+
+  <!-- Initial empty state -->
+  <div id="emptyState" class="pub-empty-state anim">
+    <div class="pes-icon"><i class="fas fa-calendar-alt"></i></div>
+    <h5>مرحباً بكم في نظام الجداول الدراسية</h5>
+    <p>اختر الكلية والقسم والفترة الأكاديمية من الفلاتر أعلاه لعرض الجدول</p>
+  </div>
+</div>
+
+<footer class="pub-footer">
+  <strong>نظام الجداول الدراسية</strong> · جامعة السودان للعلوم والتكنولوجيا · جميع الحقوق محفوظة
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const DAY_ORDER = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+const DAY_NAMES = {
+  Saturday: 'السبت', Sunday: 'الأحد', Monday: 'الاثنين',
+  Tuesday: 'الثلاثاء', Wednesday: 'الأربعاء', Thursday: 'الخميس'
+};
+
+let currentPeriodId = null;
+
+// ── College change → load departments ──
+document.getElementById('collegeSelect').addEventListener('change', async function () {
+  const collegeId = this.value;
+  const deptSel = document.getElementById('deptSelect');
+  const periodSel = document.getElementById('periodSelect');
+
+  deptSel.innerHTML = '<option value="">اختر القسم...</option>';
+  deptSel.disabled = true;
+  periodSel.innerHTML = '<option value="">اختر الفترة...</option>';
+  periodSel.disabled = true;
+  clearSchedule();
+
+  if (!collegeId) return;
+
+  try {
+    const res = await fetch(`/api/public/departments/?college_id=${collegeId}`);
+    const data = await res.json();
+    data.departments.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = d.name;
+      deptSel.appendChild(opt);
+    });
+    deptSel.disabled = data.departments.length === 0;
+  } catch (e) {
+    console.error('Error loading departments', e);
+  }
+});
+
+// ── Department change → load periods ──
+document.getElementById('deptSelect').addEventListener('change', async function () {
+  const deptId = this.value;
+  const periodSel = document.getElementById('periodSelect');
+
+  periodSel.innerHTML = '<option value="">اختر الفترة...</option>';
+  periodSel.disabled = true;
+  clearSchedule();
+
+  if (!deptId) return;
+
+  try {
+    const res = await fetch(`/api/public/periods/?dept_id=${deptId}`);
+    const data = await res.json();
+    data.periods.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.label;
+      periodSel.appendChild(opt);
+    });
+    periodSel.disabled = data.periods.length === 0;
+  } catch (e) {
+    console.error('Error loading periods', e);
+  }
+});
+
+// ── Period change → load schedule ──
+document.getElementById('periodSelect').addEventListener('change', async function () {
+  const periodId = this.value;
+  currentPeriodId = periodId;
+
+  if (!periodId) {
+    clearSchedule();
+    return;
+  }
+
+  showLoading(true);
+  document.getElementById('downloadBar').style.display = 'none';
+
+  try {
+    const res = await fetch(`/api/public/schedule/?period_id=${periodId}`);
+    const data = await res.json();
+    showLoading(false);
+    renderSchedule(data, periodId);
+  } catch (e) {
+    console.error('Error loading schedule', e);
+    showLoading(false);
+    showEmptyState('حدث خطأ أثناء تحميل الجدول. الرجاء المحاولة مرة أخرى.');
+  }
+});
+
+function showLoading(visible) {
+  document.getElementById('loadingSpinner').style.display = visible ? 'block' : 'none';
+  document.getElementById('emptyState').style.display = visible ? 'none' : '';
+  document.getElementById('scheduleArea').innerHTML = '';
+}
+
+function clearSchedule() {
+  currentPeriodId = null;
+  document.getElementById('scheduleArea').innerHTML = '';
+  document.getElementById('downloadBar').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'block';
+  document.getElementById('emptyState').innerHTML = `
+    <div class="pes-icon"><i class="fas fa-hand-point-up"></i></div>
+    <h5>اختر القسم والفترة الأكاديمية</h5>
+    <p>حدد القسم والسنة الدراسية لعرض الجدول الأسبوعي</p>
+  `;
+}
+
+function showEmptyState(msg) {
+  document.getElementById('scheduleArea').innerHTML = '';
+  const es = document.getElementById('emptyState');
+  es.style.display = 'block';
+  es.innerHTML = `
+    <div class="pes-icon"><i class="fas fa-exclamation-triangle"></i></div>
+    <h5>${msg || 'لا توجد جداول لهذه الفترة'}</h5>
+    <p>لم يتم تسجيل أي محاضرات أو معامل لهذه الفترة الأكاديمية بعد.</p>
+  `;
+}
+
+function renderSchedule(data, periodId) {
+  const { lectures, labs, has_data } = data;
+
+  if (!has_data) {
+    showEmptyState();
+    return;
+  }
+
+  // Update download links
+  const base = '/schedule/export/?period_id=' + periodId;
+  document.getElementById('csvLink').href  = base + '&format=csv';
+  document.getElementById('xlsxLink').href = base + '&format=excel';
+  document.getElementById('pdfLink').href  = base + '&format=pdf';
+  document.getElementById('downloadBar').style.display = 'flex';
+
+  // Build schedule grid by day
+  const grid = {};
+  DAY_ORDER.forEach(d => { grid[d] = []; });
+  lectures.forEach(l => { if (grid[l.day]) grid[l.day].push(l); });
+  labs.forEach(l => { if (grid[l.day]) grid[l.day].push(l); });
+  DAY_ORDER.forEach(d => {
+    grid[d].sort((a, b) => a.start_time.localeCompare(b.start_time));
+  });
+
+  const total = lectures.length + labs.length;
+
+  // Build table HTML
+  const headerCells = DAY_ORDER.map(d => `<th>${DAY_NAMES[d]}</th>`).join('');
+  const bodyCells = DAY_ORDER.map(d => {
+    const items = grid[d];
+    if (!items.length) return `<td style="min-width:145px;"><div class="empty-cell">—</div></td>`;
+    const blocks = items.map(item => {
+      if (item.type === 'lecture') {
+        return `
+          <div class="lecture-block">
+            <div class="lc-name">${item.course_name}</div>
+            <div class="lc-meta"><i class="fas fa-clock" style="font-size:.6rem;"></i> ${item.start_time}-${item.end_time}</div>
+            <div class="lc-meta"><i class="fas fa-user-tie" style="font-size:.6rem;"></i> ${item.professor}</div>
+            <div class="lc-meta"><i class="fas fa-door-open" style="font-size:.6rem;"></i> ${item.room}</div>
+          </div>`;
+      } else {
+        const grp = item.group_number ? `<div class="lb-meta">مجموعة ${item.group_number}</div>` : '';
+        const asst = item.assistant ? `<div class="lb-meta"><i class="fas fa-user" style="font-size:.6rem;"></i> ${item.assistant}</div>` : '';
+        return `
+          <div class="lab-block">
+            <div class="lb-name">${item.course_name}</div>
+            <div class="lb-meta"><i class="fas fa-clock" style="font-size:.6rem;"></i> ${item.start_time}-${item.end_time}</div>
+            <div class="lb-meta"><i class="fas fa-user-tie" style="font-size:.6rem;"></i> ${item.professor}</div>
+            ${asst}
+            <div class="lb-meta"><i class="fas fa-flask" style="font-size:.6rem;"></i> ${item.hall}</div>
+            ${grp}
+          </div>`;
+      }
+    }).join('');
+    return `<td style="min-width:145px;">${blocks}</td>`;
+  }).join('');
+
+  const html = `
+    <div class="schedule-card anim">
+      <div class="schedule-card-header">
+        <h6><i class="fas fa-table me-2"></i>الجدول الأسبوعي</h6>
+        <span class="schedule-count">${lectures.length} محاضرة · ${labs.length} معمل</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered schedule-table mb-0">
+          <thead><tr>${headerCells}</tr></thead>
+          <tbody><tr>${bodyCells}</tr></tbody>
+        </table>
+      </div>
+    </div>`;
+
+  document.getElementById('scheduleArea').innerHTML = html;
+  document.getElementById('emptyState').style.display = 'none';
+}
+
+function resetFilters() {
+  document.getElementById('collegeSelect').value = '';
+  document.getElementById('deptSelect').innerHTML = '<option value="">اختر القسم...</option>';
+  document.getElementById('deptSelect').disabled = true;
+  document.getElementById('periodSelect').innerHTML = '<option value="">اختر الفترة...</option>';
+  document.getElementById('periodSelect').disabled = true;
+  currentPeriodId = null;
+  document.getElementById('scheduleArea').innerHTML = '';
+  document.getElementById('downloadBar').style.display = 'none';
+  const es = document.getElementById('emptyState');
+  es.style.display = 'block';
+  es.innerHTML = `
+    <div class="pes-icon"><i class="fas fa-calendar-alt"></i></div>
+    <h5>مرحباً بكم في نظام الجداول الدراسية</h5>
+    <p>اختر الكلية والقسم والفترة الأكاديمية من الفلاتر أعلاه لعرض الجدول</p>
+  `;
+}
+</script>
+</body>
+</html>

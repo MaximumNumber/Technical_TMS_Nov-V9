@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% block title %}لوحة التحليلات{% endblock %}
+{% block page_title %}لوحة التحليلات الشاملة{% endblock %}
+{% block extra_css %}
+<style>
+  .kpi-card {
+    background: linear-gradient(135deg, #0a3341, #17616c);
+    border-radius: 16px; padding: 1.25rem 1.5rem;
+    color: #fff; display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 4px 18px rgba(23,97,108,0.25); height: 100%;
+  }
+  .kpi-card.amber { background: linear-gradient(135deg, #b7770d, #f5a623); box-shadow: 0 4px 18px rgba(245,166,35,0.25); }
+  .kpi-card.green { background: linear-gradient(135deg, #1a7a42, #2ecc71); box-shadow: 0 4px 18px rgba(46,204,113,0.25); }
+  .kpi-card.red { background: linear-gradient(135deg, #9b2020, #e74c3c); box-shadow: 0 4px 18px rgba(231,76,60,0.25); }
+  .kpi-card.purple { background: linear-gradient(135deg, #6c3483, #9b59b6); box-shadow: 0 4px 18px rgba(155,89,182,0.25); }
+  .kpi-card.teal { background: linear-gradient(135deg, #118a7e, #1abc9c); box-shadow: 0 4px 18px rgba(26,188,156,0.25); }
+  .kpi-card.blue { background: linear-gradient(135deg, #1a5276, #2980b9); box-shadow: 0 4px 18px rgba(41,128,185,0.25); }
+  .kpi-card.dark { background: linear-gradient(135deg, #2c3e50, #4a6274); box-shadow: 0 4px 18px rgba(44,62,80,0.25); }
+  .kpi-card.orange { background: linear-gradient(135deg, #8e4a00, #e67e22); box-shadow: 0 4px 18px rgba(230,126,34,0.25); }
+  .kpi-icon { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+  .kpi-value { font-size: 2rem; font-weight: 900; line-height: 1; }
+  .kpi-label { font-size: 0.76rem; opacity: 0.85; margin-top: 0.2rem; }
+  .analytics-card { background: #fff; border-radius: 16px; padding: 1.25rem 1.5rem; box-shadow: 0 2px 16px rgba(0,0,0,0.07); height: 100%; }
+  .analytics-card h6 { color: #0a3341; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .usage-bar { height: 7px; border-radius: 4px; background: #edf2f7; overflow: hidden; margin-top: 3px; }
+  .usage-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #17616c, #00c9b1); transition: width 0.7s ease; }
+  .usage-bar-fill.amber { background: linear-gradient(90deg, #f5a623, #e0941a); }
+  .filter-bar { background: #fff; border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .summary-strip { background: linear-gradient(135deg, #0a3341, #17616c); border-radius: 14px; padding: 1rem 1.5rem; color: #fff; display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 1.5rem; }
+  .summary-item { display: flex; flex-direction: column; }
+  .summary-item .s-label { font-size: 0.72rem; opacity: 0.75; }
+  .summary-item .s-value { font-size: 1.15rem; font-weight: 800; }
+  .util-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15em 0.6em; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+  .util-low { background: #fee2e2; color: #991b1b; }
+  .util-mid { background: #fef3c7; color: #92400e; }
+  .util-high { background: #d1fae5; color: #065f46; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-chart-bar"></i></div>
+    <div><h4>لوحة التحليلات الشاملة</h4><div class="page-header-sub">إحصاءات وتقارير الجداول الدراسية</div></div>
+  </div>
+  <a href="{% if is_system_manager %}{% url 'system_manager_dashboard' %}{% else %}{% url 'college_manager_dashboard' %}{% endif %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+
+{% if is_system_manager %}
+<div class="filter-bar fade-in-up">
+  <form method="get" class="d-flex align-items-center gap-2 flex-wrap w-100">
+    <label class="fw-semibold small mb-0" style="color:#4a6872;"><i class="fas fa-building me-1"></i>تصفية حسب الكلية:</label>
+    <select name="college_id" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+      <option value="">جميع الكليات</option>
+      {% for c in colleges %}<option value="{{ c.id }}" {% if selected_college_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    {% if selected_college_id %}<a href="{% url 'analytics_dashboard' %}" class="btn btn-xs btn-outline-danger">إلغاء التصفية</a>{% endif %}
+  </form>
+</div>
+{% endif %}
+
+{% if college %}
+<div class="alert alert-info mb-3 py-2 fade-in-up"><i class="fas fa-building me-2"></i><strong>عرض بيانات كلية:</strong> {{ college.name }}</div>
+{% endif %}
+
+<!-- Summary Strip -->
+{% if analytics.total_sessions > 0 %}
+<div class="summary-strip fade-in-up">
+  <div class="summary-item">
+    <span class="s-label">إجمالي الجلسات</span>
+    <span class="s-value">{{ analytics.total_sessions }}</span>
+  </div>
+  {% if analytics.busiest_day %}
+  <div class="summary-item">
+    <span class="s-label">أكثر الأيام ازدحاماً</span>
+    <span class="s-value">{{ analytics.busiest_day }} ({{ analytics.busiest_day_count }})</span>
+  </div>
+  {% endif %}
+  <div class="summary-item">
+    <span class="s-label">متوسط الجلسات / أستاذ</span>
+    <span class="s-value">{{ analytics.avg_hours_per_professor }}</span>
+  </div>
+  <div class="summary-item">
+    <span class="s-label">متوسط استخدام القاعات</span>
+    <span class="s-value">{{ analytics.rooms_util_avg }}%</span>
+  </div>
+  <div class="summary-item">
+    <span class="s-label">متوسط استخدام المعامل</span>
+    <span class="s-value">{{ analytics.halls_util_avg }}%</span>
+  </div>
+  {% if analytics.conflicts_count > 0 %}
+  <div class="summary-item">
+    <span class="s-label">تعارضات مكتشفة</span>
+    <span class="s-value" style="color:#f5a623;">{{ analytics.conflicts_count }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- KPIs Row 1 -->
+<div class="row g-3 mb-3 fade-in-up fade-in-up-1">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card"><div class="kpi-icon"><i class="fas fa-calendar-check"></i></div><div><div class="kpi-value">{{ analytics.total_sessions }}</div><div class="kpi-label">إجمالي الجلسات</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card amber"><div class="kpi-icon"><i class="fas fa-chalkboard"></i></div><div><div class="kpi-value">{{ analytics.total_lectures }}</div><div class="kpi-label">محاضرات</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card orange"><div class="kpi-icon"><i class="fas fa-flask"></i></div><div><div class="kpi-value">{{ analytics.total_labs }}</div><div class="kpi-label">معامل</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-chalkboard-teacher"></i></div><div><div class="kpi-value">{{ analytics.active_professors }}</div><div class="kpi-label">أساتذة نشطون</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card purple"><div class="kpi-icon"><i class="fas fa-sitemap"></i></div><div><div class="kpi-value">{{ analytics.total_departments }}</div><div class="kpi-label">أقسام</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card teal"><div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div><div><div class="kpi-value">{{ analytics.conflicts_count }}</div><div class="kpi-label">تعارضات</div></div></div>
+  </div>
+</div>
+
+<!-- KPIs Row 2 -->
+<div class="row g-3 mb-4 fade-in-up" style="animation-delay:0.1s">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card red"><div class="kpi-icon"><i class="fas fa-door-open"></i></div><div><div class="kpi-value">{{ analytics.total_rooms }}</div><div class="kpi-label">قاعات دراسية</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-microscope"></i></div><div><div class="kpi-value">{{ analytics.total_halls }}</div><div class="kpi-label">معامل مسجّلة</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card dark"><div class="kpi-icon"><i class="fas fa-door-closed"></i></div><div><div class="kpi-value">{{ analytics.unused_rooms }}</div><div class="kpi-label">قاعات غير مستخدمة</div></div></div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card dark"><div class="kpi-icon"><i class="fas fa-flask"></i></div><div><div class="kpi-value">{{ analytics.unused_halls }}</div><div class="kpi-label">معامل غير مستخدمة</div></div></div>
+  </div>
+  {% if analytics.busiest_day %}
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-calendar-day"></i></div><div><div class="kpi-value" style="font-size:1.3rem;">{{ analytics.busiest_day }}</div><div class="kpi-label">أكثر الأيام ازدحاماً</div></div></div>
+  </div>
+  {% endif %}
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-user-clock"></i></div><div><div class="kpi-value">{{ analytics.avg_hours_per_professor }}</div><div class="kpi-label">متوسط جلسات/أستاذ</div></div></div>
+  </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row g-3 mb-4 fade-in-up fade-in-up-2">
+  <div class="col-lg-8">
+    <div class="analytics-card">
+      <h6><i class="fas fa-calendar-week" style="color:#17616c;"></i>توزيع الجلسات حسب اليوم</h6>
+      {% if analytics.day_lecture_counts or analytics.day_lab_counts %}
+      <canvas id="dayDistChart" height="90"></canvas>
+      {% else %}
+      <div class="empty-state" style="padding:2rem;"><p>لا توجد بيانات كافية</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="analytics-card">
+      <h6><i class="fas fa-chart-pie" style="color:#f5a623;"></i>توزيع أنواع الجلسات</h6>
+      <div style="position:relative;height:200px;">
+        <canvas id="lectureTypeChart"></canvas>
+      </div>
+      <div class="mt-2 d-flex justify-content-center gap-3" style="font-size:0.75rem;">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#17616c;margin-left:4px;"></span>محاضرات: <strong>{{ analytics.total_lectures }}</strong></span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#f5a623;margin-left:4px;"></span>معامل: <strong>{{ analytics.total_labs }}</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row 2 — Room & Hall utilization -->
+<div class="row g-3 mb-4 fade-in-up fade-in-up-3">
+  <div class="col-lg-6">
+    <div class="analytics-card">
+      <h6><i class="fas fa-door-open" style="color:#17616c;"></i>أكثر القاعات استخداماً <span class="util-badge {% if analytics.rooms_util_avg < 30 %}util-low{% elif analytics.rooms_util_avg < 60 %}util-mid{% else %}util-high{% endif %} ms-1">متوسط {{ analytics.rooms_util_avg }}%</span></h6>
+      {% if analytics.room_utilization %}
+      {% for room in analytics.room_utilization|slice:":8" %}
+      <div class="mb-2">
+        <div class="d-flex justify-content-between" style="font-size:0.8rem;"><span style="color:#0a3341;font-weight:500;">{{ room.name }}</span><span style="color:#17616c;font-weight:700;">{{ room.sessions }} جلسة</span></div>
+        <div class="usage-bar"><div class="usage-bar-fill" style="width:{{ room.utilization_pct }}%"></div></div>
+      </div>
+      {% endfor %}
+      {% if analytics.unused_rooms > 0 %}<div class="alert alert-warning py-1 mt-2 mb-0"><small><i class="fas fa-exclamation-triangle me-1"></i>{{ analytics.unused_rooms }} قاعة غير مستخدمة</small></div>{% endif %}
+      {% else %}
+      <div class="empty-state" style="padding:1.5rem;"><p>لا توجد بيانات</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="analytics-card">
+      <h6><i class="fas fa-flask" style="color:#f5a623;"></i>أكثر المعامل استخداماً <span class="util-badge {% if analytics.halls_util_avg < 30 %}util-low{% elif analytics.halls_util_avg < 60 %}util-mid{% else %}util-high{% endif %} ms-1">متوسط {{ analytics.halls_util_avg }}%</span></h6>
+      {% if analytics.hall_utilization %}
+      {% for hall in analytics.hall_utilization|slice:":8" %}
+      <div class="mb-2">
+        <div class="d-flex justify-content-between" style="font-size:0.8rem;"><span style="color:#0a3341;font-weight:500;">{{ hall.name }}</span><span style="color:#f5a623;font-weight:700;">{{ hall.sessions }} جلسة</span></div>
+        <div class="usage-bar"><div class="usage-bar-fill amber" style="width:{{ hall.utilization_pct }}%"></div></div>
+      </div>
+      {% endfor %}
+      {% if analytics.unused_halls > 0 %}<div class="alert alert-warning py-1 mt-2 mb-0"><small><i class="fas fa-exclamation-triangle me-1"></i>{{ analytics.unused_halls }} معمل غير مستخدم</small></div>{% endif %}
+      {% else %}
+      <div class="empty-state" style="padding:1.5rem;"><p>لا توجد بيانات</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row 3 -->
+<div class="row g-3 mb-4 fade-in-up" style="animation-delay:0.4s">
+  <div class="col-lg-6">
+    <div class="analytics-card">
+      <h6><i class="fas fa-chalkboard-teacher" style="color:#9b59b6;"></i>الأساتذة الأعلى عبئاً تدريسياً</h6>
+      <div style="font-size:0.72rem;color:#7a9ba5;margin-bottom:0.75rem;">متوسط الجلسات لكل أستاذ: <strong style="color:#0a3341;">{{ analytics.avg_hours_per_professor }}</strong></div>
+      {% if analytics.top_professors %}<canvas id="professorLoadChart" height="120"></canvas>
+      {% else %}<div class="empty-state" style="padding:1.5rem;"><p>لا توجد بيانات</p></div>{% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="analytics-card">
+      <h6><i class="fas fa-sitemap" style="color:#2c9aaa;"></i>الأقسام الأكثر ضغطاً</h6>
+      {% if analytics.top_departments %}<canvas id="deptPressureChart" height="120"></canvas>
+      {% else %}<div class="empty-state" style="padding:1.5rem;"><p>لا توجد بيانات</p></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Day Totals Sparkline -->
+{% if analytics.total_sessions > 0 %}
+<div class="row g-3 mb-4 fade-in-up" style="animation-delay:0.5s">
+  <div class="col-12">
+    <div class="analytics-card">
+      <h6><i class="fas fa-chart-area" style="color:#17616c;"></i>إجمالي الجلسات اليومية (محاضرات + معامل)</h6>
+      <canvas id="totalDayChart" height="55"></canvas>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family = "'Tajawal','Segoe UI',sans-serif";
+Chart.defaults.color = '#5a7a84';
+const tmsColor = '#17616c', accentColor = '#f5a623', secondColor = '#2c9aaa';
+
+const dayCtx = document.getElementById('dayDistChart');
+if (dayCtx) {
+  new Chart(dayCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ analytics.day_names|safe }},
+      datasets: [
+        { label: 'محاضرات', data: {{ analytics.day_lecture_counts|safe }}, backgroundColor: 'rgba(23,97,108,0.8)', borderColor: tmsColor, borderWidth: 1.5, borderRadius: 5 },
+        { label: 'معامل', data: {{ analytics.day_lab_counts|safe }}, backgroundColor: 'rgba(245,166,35,0.8)', borderColor: accentColor, borderWidth: 1.5, borderRadius: 5 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+}
+
+const typeCtx = document.getElementById('lectureTypeChart');
+if (typeCtx) {
+  const lbl = {{ analytics.lecture_type_dist_labels|safe }};
+  const val = {{ analytics.lecture_type_dist_values|safe }};
+  const allData = val.length ? val : [{{ analytics.total_lectures }}, {{ analytics.total_labs }}];
+  const allLabels = lbl.length ? lbl : ['محاضرات','معامل'];
+  if (allData.some(v => v > 0)) {
+    new Chart(typeCtx, {
+      type: 'doughnut',
+      data: { labels: allLabels, datasets: [{ data: allData, backgroundColor: [tmsColor, accentColor, secondColor, '#9b59b6', '#2ecc71'], borderWidth: 2, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } } }
+    });
+  }
+}
+
+const profCtx = document.getElementById('professorLoadChart');
+if (profCtx) {
+  const pd = {{ analytics.top_professors|safe }};
+  if (pd.length) {
+    new Chart(profCtx, {
+      type: 'bar',
+      data: {
+        labels: pd.map(p => p.name.length > 15 ? p.name.substring(0,15)+'...' : p.name),
+        datasets: [
+          { label: 'محاضرات', data: pd.map(p => p.lectures), backgroundColor: 'rgba(23,97,108,0.8)', borderRadius: 4 },
+          { label: 'معامل', data: pd.map(p => p.labs), backgroundColor: 'rgba(245,166,35,0.8)', borderRadius: 4 }
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+    });
+  }
+}
+
+const deptCtx = document.getElementById('deptPressureChart');
+if (deptCtx) {
+  const dd = {{ analytics.top_departments|safe }};
+  if (dd.length) {
+    new Chart(deptCtx, {
+      type: 'bar',
+      data: {
+        labels: dd.map(d => d.name.length > 18 ? d.name.substring(0,18)+'...' : d.name),
+        datasets: [
+          { label: 'محاضرات', data: dd.map(d => d.lectures), backgroundColor: 'rgba(44,154,170,0.8)', borderRadius: 4 },
+          { label: 'معامل', data: dd.map(d => d.labs), backgroundColor: 'rgba(155,89,182,0.8)', borderRadius: 4 }
+        ]
+      },
+      options: { responsive: true, indexAxis: 'y', plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true, beginAtZero: true }, y: { stacked: true } } }
+    });
+  }
+}
+
+const totalDayCtx = document.getElementById('totalDayChart');
+if (totalDayCtx) {
+  const totals = {{ analytics.day_totals|safe }};
+  const names = {{ analytics.day_names|safe }};
+  new Chart(totalDayCtx, {
+    type: 'line',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'إجمالي الجلسات',
+        data: totals,
+        fill: true,
+        backgroundColor: 'rgba(23,97,108,0.12)',
+        borderColor: tmsColor,
+        borderWidth: 2.5,
+        pointBackgroundColor: tmsColor,
+        pointRadius: 5,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+</script>
+{% endblock %}

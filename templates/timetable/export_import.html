@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}تصدير واستيراد البيانات{% endblock %}
+{% block page_title %}تصدير واستيراد البيانات{% endblock %}
+{% block extra_css %}
+<style>
+  .export-box { background:#fff; border-radius:16px; padding:1.5rem; box-shadow:0 2px 14px rgba(0,0,0,0.07); border-top:4px solid #17616c; transition:transform 0.2s; height:100%; }
+  .export-box:hover { transform:translateY(-3px); }
+  .export-box.accent { border-top-color:#f5a623; }
+  .export-box.green { border-top-color:#2ecc71; }
+  .export-box.red { border-top-color:#e74c3c; }
+  .export-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:1rem; }
+  .export-icon.teal { background:linear-gradient(135deg,#e8f6f8,#d0eef4); color:#17616c; }
+  .export-icon.amber { background:linear-gradient(135deg,#fff8e7,#fdebd0); color:#f5a623; }
+  .export-icon.emerald { background:linear-gradient(135deg,#e8f5e9,#c8e6c9); color:#2ecc71; }
+  .export-icon.rose { background:linear-gradient(135deg,#fce4ec,#f8bbd0); color:#e74c3c; }
+  .format-badge { display:inline-flex; align-items:center; gap:0.3rem; padding:0.2em 0.6em; border-radius:6px; font-size:0.75rem; font-weight:600; }
+  .fmt-csv { background:#d1e7dd; color:#0f5132; }
+  .fmt-xlsx { background:#d1fae5; color:#065f46; }
+  .fmt-pdf { background:#fee2e2; color:#991b1b; }
+  .import-zone { border:2px dashed #d0dde5; border-radius:12px; padding:1.5rem; text-align:center; transition:all 0.2s; cursor:pointer; }
+  .import-zone:hover, .import-zone.drag-over { border-color:#17616c; background:#e8f6f8; }
+  .section-head { font-weight:800; font-size:1rem; color:#0a3341; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
+  .section-sub { font-size:0.82rem; color:#7a9ba5; margin-bottom:1.25rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-file-import"></i></div>
+    <div><h4>تصدير واستيراد البيانات</h4><div class="page-header-sub">نقل وتبادل بيانات الجداول الدراسية</div></div>
+  </div>
+  <a href="{% if is_system_manager %}{% url 'system_manager_dashboard' %}{% else %}{% url 'college_manager_dashboard' %}{% endif %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+
+<div class="mb-4 fade-in-up fade-in-up-1">
+  <div class="section-head"><i class="fas fa-file-export" style="color:#17616c;"></i>تصدير البيانات</div>
+  <div class="section-sub">قم بتصدير الجداول إلى صيغ مختلفة للمشاركة والطباعة والأرشفة</div>
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-3">
+      <div class="export-box">
+        <div class="export-icon teal"><i class="fas fa-file-csv"></i></div>
+        <div class="fw-bold mb-1">CSV — المحاضرات</div>
+        <div class="text-muted small mb-2">تصدير جدول المحاضرات بصيغة CSV</div>
+        <span class="format-badge fmt-csv mb-2">CSV</span>
+        <a href="{% url 'export_lectures_csv' %}" class="btn btn-tms btn-sm w-100 d-block" target="_blank" rel="noopener"><i class="fas fa-download me-1"></i>تحميل</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="export-box accent">
+        <div class="export-icon amber"><i class="fas fa-file-csv"></i></div>
+        <div class="fw-bold mb-1">CSV — المعامل</div>
+        <div class="text-muted small mb-2">تصدير جدول المعامل بصيغة CSV</div>
+        <span class="format-badge fmt-csv mb-2">CSV</span>
+        <a href="{% url 'export_labs_csv' %}" class="btn btn-sm w-100 d-block" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#f5a623,#e0941a);color:#fff;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:600;"><i class="fas fa-download me-1"></i>تحميل</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="export-box green">
+        <div class="export-icon emerald"><i class="fas fa-file-excel"></i></div>
+        <div class="fw-bold mb-1">Excel الشامل</div>
+        <div class="text-muted small mb-2">جميع الجداول في ملف Excel احترافي</div>
+        <span class="format-badge fmt-xlsx mb-2">XLSX</span>
+        <a href="{% url 'export_lectures_excel' %}" class="btn btn-sm w-100 d-block" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#1d6f42,#2ecc71);color:#fff;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:600;"><i class="fas fa-file-excel me-1"></i>تحميل</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="export-box red">
+        <div class="export-icon rose"><i class="fas fa-file-pdf"></i></div>
+        <div class="fw-bold mb-1">PDF للطباعة</div>
+        <div class="text-muted small mb-2">تصدير بصيغة PDF جاهزة للطباعة</div>
+        <span class="format-badge fmt-pdf mb-2">PDF</span>
+        <a href="{% url 'export_schedule_pdf' %}" class="btn btn-danger btn-sm w-100 d-block" target="_blank" rel="noopener"><i class="fas fa-file-pdf me-1"></i>تحميل</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mb-4 fade-in-up fade-in-up-2">
+  <div class="section-head"><i class="fas fa-file-import" style="color:#17616c;"></i>استيراد البيانات</div>
+  <div class="section-sub">استورد بيانات الجداول من ملفات CSV. نزّل النموذج أولاً وأدخل البيانات ثم ارفعه.</div>
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header card-header-light"><i class="fas fa-download me-2"></i>نماذج الاستيراد</div>
+        <div class="card-body">
+          <p class="text-muted small">نزّل النموذج الفارغ وأدخل بياناتك ثم ارفعه</p>
+          <div class="d-flex flex-column gap-2">
+            <a href="{% url 'import_schedule_template' %}?type=lectures" class="btn btn-sm btn-outline-primary"><i class="fas fa-file-csv me-2"></i>نموذج استيراد المحاضرات</a>
+            <a href="{% url 'import_schedule_template' %}?type=labs" class="btn btn-sm btn-outline-warning"><i class="fas fa-file-csv me-2"></i>نموذج استيراد المعامل</a>
+          </div>
+          <div class="alert alert-info mt-3 py-2 mb-0"><small><i class="fas fa-info-circle me-1"></i>استخدم معرّفات IDs صحيحة للأقسام والمواد والأساتذة والقاعات</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header card-header-light"><i class="fas fa-upload me-2"></i>استيراد المحاضرات</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'import_schedule_csv' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="schedule_type" value="lectures">
+            <div class="import-zone" id="lecturesDropZone" onclick="document.getElementById('lecturesFile').click();">
+              <i class="fas fa-cloud-upload-alt fa-2x" style="color:#a0b8c1;margin-bottom:0.5rem;"></i>
+              <div class="text-muted small">اضغط لاختيار ملف CSV أو اسحب وأفلت</div>
+              <div class="small" style="color:#17616c;margin-top:0.3rem;" id="lecturesFileName">لم يتم اختيار ملف</div>
+            </div>
+            <input type="file" id="lecturesFile" name="csv_file" accept=".csv" class="d-none"
+              onchange="document.getElementById('lecturesFileName').textContent = this.files[0]?.name || 'لم يتم الاختيار'">
+            <button type="submit" class="btn btn-tms btn-sm w-100 mt-2"><i class="fas fa-upload me-2"></i>استيراد المحاضرات</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header card-header-light"><i class="fas fa-upload me-2"></i>استيراد المعامل</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'import_schedule_csv' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="schedule_type" value="labs">
+            <div class="import-zone" id="labsDropZone" onclick="document.getElementById('labsFile').click();">
+              <i class="fas fa-cloud-upload-alt fa-2x" style="color:#a0b8c1;margin-bottom:0.5rem;"></i>
+              <div class="text-muted small">اضغط لاختيار ملف CSV أو اسحب وأفلت</div>
+              <div class="small" style="color:#f5a623;margin-top:0.3rem;" id="labsFileName">لم يتم اختيار ملف</div>
+            </div>
+            <input type="file" id="labsFile" name="csv_file" accept=".csv" class="d-none"
+              onchange="document.getElementById('labsFileName').textContent = this.files[0]?.name || 'لم يتم الاختيار'">
+            <button type="submit" class="btn btn-sm w-100 mt-2" style="background:linear-gradient(135deg,#f5a623,#e0941a);color:#fff;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:600;"><i class="fas fa-upload me-2"></i>استيراد المعامل</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card fade-in-up fade-in-up-3">
+  <div class="card-header card-header-light"><i class="fas fa-info-circle me-2" style="color:#17616c;"></i>دليل تنسيق الاستيراد</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6 class="fw-bold mb-2" style="font-size:0.88rem;">الحقول المطلوبة للمحاضرات:</h6>
+        <table class="table table-sm table-bordered" style="font-size:0.78rem;">
+          <thead class="table-light"><tr><th>الحقل</th><th>الوصف</th><th>مثال</th></tr></thead>
+          <tbody>
+            <tr><td>department_id</td><td>رقم القسم</td><td>1</td></tr>
+            <tr><td>period_id</td><td>رقم الفترة الأكاديمية</td><td>3</td></tr>
+            <tr><td>course_id</td><td>رقم المادة</td><td>5</td></tr>
+            <tr><td>professor_id</td><td>رقم الأستاذ</td><td>2</td></tr>
+            <tr><td>room_id</td><td>رقم القاعة</td><td>4</td></tr>
+            <tr><td>day_of_week</td><td>اليوم (إنجليزي)</td><td>Saturday</td></tr>
+            <tr><td>start_time</td><td>وقت البداية</td><td>08:00</td></tr>
+            <tr><td>end_time</td><td>وقت النهاية</td><td>10:00</td></tr>
+            <tr><td>lecture_type</td><td>النوع</td><td>lecture / exercise</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <h6 class="fw-bold mb-2" style="font-size:0.88rem;">الأيام المقبولة:</h6>
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          {% for en, ar in day_map.items %}<span class="badge-tms badge-info-soft">{{ en }} = {{ ar }}</span>{% endfor %}
+        </div>
+        <h6 class="fw-bold mb-1" style="font-size:0.88rem;">ملاحظات مهمة:</h6>
+        <ul style="font-size:0.8rem;color:#5a7a84;padding-right:1.2rem;">
+          <li>جميع IDs يجب أن تكون موجودة في قاعدة البيانات</li>
+          <li>صيغة الوقت: HH:MM (مثال: 08:00، 14:30)</li>
+          <li>يجب ترميز الملف بـ UTF-8</li>
+          <li>جميع الاستيرادات تُسجَّل في سجل التغييرات</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function setupDrop(zoneId, inputId, nameId) {
+  const zone = document.getElementById(zoneId);
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) { const dt = new DataTransfer(); dt.items.add(f); document.getElementById(inputId).files = dt.files; document.getElementById(nameId).textContent = f.name; }
+  });
+}
+setupDrop('lecturesDropZone','lecturesFile','lecturesFileName');
+setupDrop('labsDropZone','labsFile','labsFileName');
+</script>
+{% endblock %}

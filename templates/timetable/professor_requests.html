@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}طلباتي{% endblock %}
+{% block page_title %}طلباتي لتغيير المواعيد{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-exchange-alt"></i></div>
+    <div><h4>طلباتي لتغيير المواعيد</h4><div class="page-header-sub">متابعة حالة الطلبات المقدمة</div></div>
+  </div>
+  <a href="{% url 'professor_request_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i>طلب جديد</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>المادة</th><th>الموعد الأصلي</th><th>الموعد الجديد</th><th>الحالة</th><th>ملاحظات الإدارة</th><th>التاريخ</th><th></th></tr></thead>
+      <tbody>
+        {% for req in requests %}
+        <tr>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ req.course_name }}</span></td>
+          <td style="font-size:0.78rem;color:#5a7a84;">
+            {% if req.original_day %}
+            {% with d=req.original_day %}{% if d == "Saturday" %}السبت{% elif d == "Sunday" %}الأحد{% elif d == "Monday" %}الاثنين{% elif d == "Tuesday" %}الثلاثاء{% elif d == "Wednesday" %}الأربعاء{% elif d == "Thursday" %}الخميس{% endif %}{% endwith %}
+            {% if req.original_time_start %} {{ req.original_time_start|time:"H:i" }}-{{ req.original_time_end|time:"H:i" }}{% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td style="font-size:0.78rem;">
+            {% with d=req.day %}{% if d == "Saturday" %}السبت{% elif d == "Sunday" %}الأحد{% elif d == "Monday" %}الاثنين{% elif d == "Tuesday" %}الثلاثاء{% elif d == "Wednesday" %}الأربعاء{% elif d == "Thursday" %}الخميس{% endif %}{% endwith %}
+            {% if req.time_start %} {{ req.time_start|time:"H:i" }}-{{ req.time_end|time:"H:i" }}{% endif %}
+            {% if req.room %}<div style="font-size:0.72rem;color:#7a9ba5;">{{ req.room.name }}</div>{% endif %}
+          </td>
+          <td>
+            {% if req.status == "pending" %}<span class="badge-tms badge-pending">قيد الانتظار</span>
+            {% elif req.status == "approved" %}<span class="badge-tms badge-approved">موافق</span>
+            {% else %}<span class="badge-tms badge-rejected">مرفوض</span>{% endif %}
+          </td>
+          <td style="font-size:0.78rem;color:#5a7a84;">{{ req.admin_notes|default:"—" }}</td>
+          <td style="font-size:0.78rem;color:#7a9ba5;">{{ req.created_at|date:"Y-m-d" }}</td>
+          <td>
+            {% if req.status == "pending" %}
+            <a href="{% url 'professor_request_delete' req.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-exchange-alt"></i><p>لا توجد طلبات. <a href="{% url 'professor_request_add' %}" style="color:#17616c;">أضف طلب جديد</a></p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

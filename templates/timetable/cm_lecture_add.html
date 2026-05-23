@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block extra_css %}
+<style>
+  .conflict-item { border-radius:9px; padding:0.8rem 1rem; margin-bottom:0.6rem; }
+  .conflict-item.room { background:#fdf2f2; border-right:4px solid #e74c3c; }
+  .conflict-item.professor { background:#f5f0fa; border-right:4px solid #9b59b6; }
+  .conflict-item.department { background:#ebf5fb; border-right:4px solid #3498db; }
+  .conflict-item.default { background:#fff3cd; border-right:4px solid #f0a500; }
+  .suggestion-section { background:#f0fff4; border-right:4px solid #2ecc71; border-radius:9px; padding:0.85rem 1rem; }
+  .suggestion-badge { display:inline-flex; align-items:center; gap:0.3rem; padding:0.2em 0.7em; border-radius:20px; font-size:0.78rem; cursor:pointer; transition:all 0.15s; margin:0.15rem; }
+  .suggestion-badge:hover { transform:scale(1.05); }
+  .suggestion-room { background:#e8f4f6; color:#17616c; border:1px solid rgba(23,97,108,0.3); }
+  .suggestion-prof { background:#f5f0fa; color:#6c3483; border:1px solid rgba(155,89,182,0.3); }
+  .suggestion-time { background:#eafaf1; color:#1e8449; border:1px solid rgba(46,204,113,0.3); }
+  .suggestion-day  { background:#fff8e7; color:#7d6608; border:1px solid rgba(240,165,0,0.3); }
+  #conflictPanel { display:none; }
+  .checking-spinner { display:none; }
+  .no-conflict-alert { display:none; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-plus"></i></div>
+    <div><h4>{{ title }}</h4></div>
+  </div>
+  <a href="{% url back_url %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+<div class="row g-4 fade-in-up fade-in-up-1">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header card-header-primary"><i class="fas fa-edit me-2"></i>بيانات المحاضرة</div>
+      <div class="card-body p-4">
+        <form method="post" id="lectureForm" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label">{{ field.label }}{% if field.field.required %}<span class="text-danger">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.errors %}{% for error in field.errors %}<div style="color:#c62828;font-size:0.76rem;margin-top:0.3rem;"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>{% endfor %}{% endif %}
+          </div>
+          {% endfor %}
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+          {% endif %}
+          <div class="checking-spinner text-center py-2" id="checkingSpinner">
+            <div class="spinner-border spinner-border-sm text-warning me-2"></div>
+            <small class="text-muted">جارٍ فحص التعارضات...</small>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-tms px-4"><i class="fas fa-save me-2"></i>حفظ</button>
+            <button type="button" class="btn btn-outline-secondary px-4" onclick="checkConflictsManual()"><i class="fas fa-search me-2"></i>فحص تعارضات</button>
+            <a href="{% url back_url %}" class="btn btn-outline-secondary px-4">إلغاء</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <!-- No conflict success -->
+    <div class="alert alert-success no-conflict-alert" id="noConflictAlert">
+      <i class="fas fa-check-circle me-2"></i>لا توجد تعارضات في هذا الموعد
+    </div>
+    <!-- Conflict panel -->
+    <div id="conflictPanel">
+      <div style="background:linear-gradient(135deg,#e74c3c,#c0392b);border-radius:14px 14px 0 0;padding:0.85rem 1rem;color:#fff;display:flex;align-items:center;justify-content:space-between;">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <strong>تعارضات مكتشفة</strong>
+          <small class="opacity-75" id="conflictCountLabel"></small>
+        </div>
+        <button type="button" style="background:none;border:none;color:#fff;cursor:pointer;" onclick="document.getElementById('conflictPanel').style.display='none';"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="background:#fff;border-radius:0 0 14px 14px;padding:1rem;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+        <div id="conflictList"></div>
+        <div id="suggestionsList"></div>
+      </div>
+    </div>
+    <!-- Tips card -->
+    <div class="card mt-3">
+      <div class="card-header card-header-light" style="font-size:0.85rem;"><i class="fas fa-lightbulb me-2" style="color:#f5a623;"></i>تلميحات</div>
+      <div class="card-body py-2">
+        <ul style="font-size:0.8rem;color:#5a7a84;padding-right:1.2rem;margin:0;">
+          <li>تأكد من اختيار جميع الحقول قبل الحفظ</li>
+          <li>سيتم فحص التعارضات تلقائياً عند تعبئة الحقول</li>
+          <li>يمكنك الضغط على الاقتراحات لتطبيقها مباشرة</li>
+          <li>جميع التغييرات تُسجَّل في سجل التغييرات</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+let conflictCheckTimeout = null;
+function getFormData() {
+  const form = document.getElementById('lectureForm');
+  return {
+    department_id: form.querySelector('[name="department"]')?.value,
+    professor_id: form.querySelector('[name="professor"]')?.value,
+    room_id: form.querySelector('[name="room"]')?.value,
+    day_of_week: form.querySelector('[name="day_of_week"]')?.value,
+    start_time: form.querySelector('[name="start_time"]')?.value,
+    end_time: form.querySelector('[name="end_time"]')?.value,
+    {% if edit %}exclude_id: {{ pk|default:"null" }},{% endif %}
+  };
+}
+function isFormReady(d) { return d.department_id && d.professor_id && d.room_id && d.day_of_week && d.start_time && d.end_time; }
+function checkConflictsManual() {
+  const data = getFormData();
+  if (!isFormReady(data)) { alert("يرجى تعبئة جميع الحقول المطلوبة أولاً"); return; }
+  doConflictCheck(data);
+}
+function doConflictCheck(data) {
+  document.getElementById("checkingSpinner").style.display = "block";
+  document.getElementById("conflictPanel").style.display = "none";
+  document.getElementById("noConflictAlert").style.display = "none";
+  const csrf = document.querySelector("[name=csrfmiddlewaretoken]").value;
+  fetch("/api/check-conflicts-advanced/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
+    body: JSON.stringify(data)
+  }).then(r => r.json()).then(result => {
+    document.getElementById("checkingSpinner").style.display = "none";
+    if (result.has_conflicts) showConflicts(result.conflicts, result.suggestions);
+    else document.getElementById("noConflictAlert").style.display = "block";
+  }).catch(() => { document.getElementById("checkingSpinner").style.display = "none"; });
+}
+function showConflicts(conflicts, suggestions) {
+  const panel = document.getElementById("conflictPanel");
+  document.getElementById("conflictCountLabel").textContent = `(${conflicts.length} تعارض)`;
+  let html = "";
+  conflicts.forEach(c => {
+    const cls = c.type || "default";
+    html += `<div class="conflict-item ${cls}"><div class="d-flex gap-2"><i class="${c.icon||'fas fa-exclamation'} mt-1 small"></i><div><strong>${c.title}</strong><div class="small mt-1">${c.message}</div>${c.detail?`<div class="small text-muted">${c.detail}</div>`:""}</div></div></div>`;
+  });
+  document.getElementById("conflictList").innerHTML = html;
+  let shtml = "";
+  if (suggestions && Object.keys(suggestions).length) {
+    shtml = '<div class="suggestion-section mt-3"><div class="fw-semibold small mb-2"><i class="fas fa-lightbulb text-warning me-1"></i>الحلول المقترحة:</div>';
+    (suggestions.alternative_rooms||[]).forEach(r => { shtml += `<span class="suggestion-badge suggestion-room" onclick="selectRoom(${r.id},'${r.name}')"><i class="fas fa-door-open"></i> ${r.name} (${r.code}) — ${r.capacity}</span>`; });
+    (suggestions.alternative_professors||[]).forEach(p => { shtml += `<span class="suggestion-badge suggestion-prof" onclick="selectProfessor(${p.id},'${p.name}')"><i class="fas fa-user"></i> ${p.name}</span>`; });
+    (suggestions.professor_free_days||[]).forEach(d => { shtml += `<span class="suggestion-badge suggestion-day"><i class="fas fa-calendar-day"></i> ${d}</span>`; });
+    (suggestions.free_time_slots||[]).forEach(t => { shtml += `<span class="suggestion-badge suggestion-time"><i class="fas fa-clock"></i> ${t}</span>`; });
+    shtml += "</div>";
+  }
+  document.getElementById("suggestionsList").innerHTML = shtml;
+  panel.style.display = "block";
+}
+function selectRoom(id, name) {
+  const sel = document.querySelector("[name=room]");
+  if (sel) { sel.value = id; scheduleConflictCheck(); }
+}
+function selectProfessor(id, name) {
+  const sel = document.querySelector("[name=professor]");
+  if (sel) { sel.value = id; scheduleConflictCheck(); }
+}
+function scheduleConflictCheck() {
+  clearTimeout(conflictCheckTimeout);
+  const data = getFormData();
+  if (isFormReady(data)) conflictCheckTimeout = setTimeout(() => doConflictCheck(data), 800);
+}
+document.addEventListener("DOMContentLoaded", function() {
+  ["department","professor","room","day_of_week","start_time","end_time"].forEach(n => {
+    const el = document.getElementById("lectureForm").querySelector(`[name="${n}"]`);
+    if (el) { el.addEventListener("change", scheduleConflictCheck); el.addEventListener("input", scheduleConflictCheck); }
+  });
+});
+</script>
+{% endblock %}

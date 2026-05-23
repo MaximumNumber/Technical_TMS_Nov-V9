@@ -1,0 +1,565 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل الدخول — نظام الجداول الدراسية{% endblock %}
+
+{% block auth_content %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول — نظام الجداول الدراسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal-deep:  #061a22;
+      --teal-dark:  #0a3341;
+      --teal-mid:   #17616c;
+      --teal-light: #1a7a8a;
+      --accent:     #00c9b1;
+      --accent-dk:  #00a896;
+      --gold:       #f5a623;
+    }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #f0f4f8;
+      overflow: hidden;
+    }
+
+    /* ══ LEFT PANEL (info) ══ */
+    .login-left {
+      flex: 1;
+      display: none;
+      background: linear-gradient(160deg, var(--teal-deep) 0%, var(--teal-dark) 40%, #0d5263 75%, var(--teal-mid) 100%);
+      position: relative;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 3rem;
+    }
+    @media (min-width: 960px) { .login-left { display: flex; } }
+
+    /* animated circles */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,201,177,0.18), transparent 70%);
+    }
+    .orb-1 { width: 480px; height: 480px; top: -140px; right: -140px; animation: float1 9s ease-in-out infinite; }
+    .orb-2 { width: 340px; height: 340px; bottom: -100px; left: -80px;  animation: float2 12s ease-in-out infinite; }
+    .orb-3 { width: 200px; height: 200px; top: 45%; left: 15%;          animation: float3 7s ease-in-out infinite; }
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,25px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(25px,-20px)} }
+    @keyframes float3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(10px,10px) scale(1.1)} }
+
+    /* decorative grid pattern */
+    .login-left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px
+      ), repeating-linear-gradient(
+        90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px
+      );
+    }
+
+    .info-content { position: relative; z-index: 2; text-align: center; max-width: 420px; }
+    .info-logo {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, var(--accent), #0097a7);
+      border-radius: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 2rem;
+      font-size: 2.5rem;
+      box-shadow: 0 12px 40px rgba(0,201,177,0.45), 0 0 0 12px rgba(0,201,177,0.08);
+      animation: logo-pulse 4s ease-in-out infinite;
+    }
+    @keyframes logo-pulse {
+      0%,100%{ box-shadow: 0 12px 40px rgba(0,201,177,0.45), 0 0 0 12px rgba(0,201,177,0.08); }
+      50%    { box-shadow: 0 16px 52px rgba(0,201,177,0.6),  0 0 0 18px rgba(0,201,177,0.12); }
+    }
+    .info-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
+      letter-spacing: -0.5px;
+    }
+    .info-title span { color: var(--accent); }
+    .info-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.52);
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+    }
+    .info-features { display: flex; flex-direction: column; gap: 0.85rem; text-align: right; }
+    .info-feature {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 0.85rem 1.1rem;
+      backdrop-filter: blur(8px);
+    }
+    .info-feature-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #0097a7);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .info-feature-text { font-size: 0.83rem; color: rgba(255,255,255,0.75); font-weight: 500; }
+    .info-feature-title { color: #fff; font-weight: 700; font-size: 0.85rem; margin-bottom: 1px; }
+
+    .info-footer {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.25);
+      font-size: 0.72rem;
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    /* ══ RIGHT PANEL (form) ══ */
+    .login-right {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      background: #f0f4f8;
+      position: relative;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    @media (max-width: 959px) { .login-right { max-width: 100%; } }
+
+    /* background accent */
+    .login-right::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: -80px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,201,177,0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Mobile logo */
+    .mobile-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 960px) { .mobile-logo { display: none; } }
+    .mobile-logo-icon {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, var(--accent), #0097a7);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 0.9rem;
+      box-shadow: 0 8px 24px rgba(0,201,177,0.35);
+    }
+    .mobile-logo-title { font-size: 1.1rem; font-weight: 900; color: var(--teal-dark); }
+    .mobile-logo-sub { font-size: 0.75rem; color: #8a9ba5; }
+
+    /* Form card */
+    .login-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 16px 56px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+      border: 1px solid rgba(10,51,65,0.07);
+    }
+
+    .login-card-header {
+      background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark), var(--teal-mid));
+      padding: 2rem 2rem 1.75rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.8;
+    }
+    .lc-icon {
+      width: 58px; height: 58px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 17px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+      color: var(--accent);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+    }
+    .login-card-header h4 {
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin: 0 0 0.3rem;
+      letter-spacing: -0.3px;
+    }
+    .login-card-header p {
+      color: rgba(255,255,255,0.48);
+      font-size: 0.78rem;
+      margin: 0;
+    }
+
+    .login-card-body { padding: 2rem; }
+
+    .field-group { margin-bottom: 1.3rem; }
+    .field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #4a6872;
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.2px;
+    }
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ab0ba;
+      font-size: 0.85rem;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+    .toggle-password {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ab0ba;
+      font-size: 0.85rem;
+      padding: 0.25rem;
+      line-height: 1;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toggle-password:hover { color: var(--teal-mid); }
+    .login-input {
+      width: 100%;
+      background: #f8fafc;
+      border: 2px solid #dce5ee;
+      border-radius: 12px;
+      padding: 0.75rem 2.75rem 0.75rem 2.75rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.9rem;
+      color: var(--teal-dark);
+      transition: all 0.22s;
+      outline: none;
+      direction: rtl;
+    }
+    .login-input:focus {
+      border-color: var(--teal-mid);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(23,97,108,0.1);
+    }
+    .login-input:focus + .input-icon { color: var(--teal-mid); }
+    .login-input.is-invalid { border-color: #ef4444; background: #fff5f5; }
+    .login-input.is-invalid:focus { box-shadow: 0 0 0 4px rgba(239,68,68,0.1); }
+    .field-error {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #dc2626;
+      font-size: 0.76rem;
+      margin-top: 0.4rem;
+      font-weight: 600;
+    }
+
+    /* Error alert */
+    .login-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-right: 4px solid #ef4444;
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      color: #991b1b;
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, var(--teal-mid), var(--teal-light));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.85rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 6px 20px rgba(23,97,108,0.35);
+      letter-spacing: 0.2px;
+    }
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(23,97,108,0.5);
+    }
+    .btn-login:active { transform: translateY(0); }
+
+    /* Divider */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.5rem 0 1.25rem;
+      color: #9ab0ba;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5edf2;
+    }
+
+    /* Public schedule link */
+    .pub-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--teal-mid);
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 0.7rem;
+      border: 2px solid rgba(23,97,108,0.15);
+      border-radius: 12px;
+      transition: all 0.22s;
+      background: rgba(23,97,108,0.03);
+    }
+    .pub-link:hover {
+      background: rgba(23,97,108,0.08);
+      border-color: rgba(23,97,108,0.3);
+      color: var(--teal-mid);
+      transform: translateY(-1px);
+    }
+
+    /* Version badge */
+    .version-badge {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #b0c4cc;
+      font-size: 0.71rem;
+    }
+    .version-badge span {
+      background: rgba(23,97,108,0.07);
+      border: 1px solid rgba(23,97,108,0.12);
+      border-radius: 99px;
+      padding: 0.2em 0.7em;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Left Info Panel -->
+<div class="login-left">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="info-content">
+    <div class="info-logo">🎓</div>
+    <h1 class="info-title">نظام إدارة<br><span>الجداول الدراسية</span></h1>
+    <p class="info-sub">منصة متكاملة لإدارة الجداول الدراسية في جامعة السودان للعلوم والتكنولوجيا</p>
+    <div class="info-features">
+      <div class="info-feature">
+        <div class="info-feature-icon"><i class="fas fa-calendar-week"></i></div>
+        <div>
+          <div class="info-feature-title">جدولة ذكية</div>
+          <div class="info-feature-text">إدارة شاملة للمحاضرات والمعامل مع كشف التعارضات</div>
+        </div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon"><i class="fas fa-users"></i></div>
+        <div>
+          <div class="info-feature-title">أدوار متعددة</div>
+          <div class="info-feature-text">مدير نظام، مدير كلية، رئيس قسم، أستاذ، طالب</div>
+        </div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon"><i class="fas fa-file-export"></i></div>
+        <div>
+          <div class="info-feature-title">تصدير متقدم</div>
+          <div class="info-feature-text">تصدير الجداول بصيغ PDF وExcel وCSV</div>
+        </div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon"><i class="fas fa-chart-bar"></i></div>
+        <div>
+          <div class="info-feature-title">تحليلات تفصيلية</div>
+          <div class="info-feature-text">لوحات بيانات تفاعلية ومؤشرات الأداء الرئيسية</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-footer">© 2025 جامعة السودان للعلوم والتكنولوجيا</div>
+</div>
+
+<!-- Right Form Panel -->
+<div class="login-right">
+  <div class="login-box">
+
+    <!-- Mobile logo (hidden on desktop) -->
+    <div class="mobile-logo">
+      <div class="mobile-logo-icon">🎓</div>
+      <div class="mobile-logo-title">نظام الجداول الدراسية</div>
+      <div class="mobile-logo-sub">جامعة السودان للعلوم والتكنولوجيا</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card-header">
+        <div class="lc-icon"><i class="fas fa-user-shield"></i></div>
+        <h4>تسجيل الدخول</h4>
+        <p>أدخل بيانات حسابك للمتابعة</p>
+      </div>
+
+      <div class="login-card-body">
+        {% if form.non_field_errors %}
+          <div class="login-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</span>
+          </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.username.id_for_label }}">
+              <i class="fas fa-user-circle" style="margin-left:0.35rem;color:#9ab0ba;"></i>
+              اسم المستخدم أو البريد الإلكتروني
+            </label>
+            <div class="input-wrap">
+              <input
+                type="text"
+                name="{{ form.username.html_name }}"
+                id="{{ form.username.id_for_label }}"
+                value="{{ form.username.value|default:'' }}"
+                placeholder="اسم المستخدم أو البريد الإلكتروني"
+                class="login-input {% if form.username.errors %}is-invalid{% endif %}"
+                autocomplete="username"
+                autofocus
+              >
+              <i class="fas fa-at input-icon"></i>
+            </div>
+            {% for error in form.username.errors %}
+              <div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.password.id_for_label }}">
+              <i class="fas fa-lock" style="margin-left:0.35rem;color:#9ab0ba;"></i>
+              كلمة المرور
+            </label>
+            <div class="input-wrap">
+              <input
+                type="password"
+                name="{{ form.password.html_name }}"
+                id="{{ form.password.id_for_label }}"
+                placeholder="كلمة المرور"
+                class="login-input {% if form.password.errors %}is-invalid{% endif %}"
+                autocomplete="current-password"
+              >
+              <i class="fas fa-lock input-icon"></i>
+              <button type="button" class="toggle-password" id="togglePassword" aria-label="إظهار/إخفاء كلمة المرور">
+                <i class="fas fa-eye" id="togglePasswordIcon"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}
+              <div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i>
+            دخول إلى النظام
+          </button>
+        </form>
+
+        <div class="or-divider">أو</div>
+
+        <a href="{% url 'public_schedule' %}" class="pub-link">
+          <i class="fas fa-globe"></i>
+          عرض الجدول العام بدون تسجيل دخول
+        </a>
+      </div>
+    </div>
+
+    <div class="version-badge">
+      <span>SUST TMS v2.0</span> &nbsp;·&nbsp; جامعة السودان للعلوم والتكنولوجيا
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const toggleBtn = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+  const toggleIcon = document.getElementById('togglePasswordIcon');
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener('click', function () {
+      const isHidden = passwordInput.type === 'password';
+      passwordInput.type = isHidden ? 'text' : 'password';
+      toggleIcon.className = isHidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+    });
+  }
+</script>
+</body>
+</html>
+{% endblock %}

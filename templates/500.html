@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 — خطأ في الخادم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #090204;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+    .bg-mesh {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 65% 55% at 85% 15%, rgba(220,38,38,0.16) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 65% at 15% 85%, rgba(185,28,28,0.12) 0%, transparent 55%),
+        linear-gradient(175deg, #090204 0%, #1c0606 40%, #300a0a 70%, #4a0f0f 100%);
+      z-index: 0;
+    }
+    .grid-pattern {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(220,38,38,0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(220,38,38,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+    .orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .orb-1 {
+      width: 500px; height: 500px; top: -180px; right: -180px;
+      background: radial-gradient(circle, rgba(220,38,38,0.12) 0%, transparent 65%);
+      animation: drift1 12s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 380px; height: 380px; bottom: -120px; left: -120px;
+      background: radial-gradient(circle, rgba(185,28,28,0.1) 0%, transparent 65%);
+      animation: drift2 16s ease-in-out infinite;
+    }
+    @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-28px,32px)} }
+    @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(24px,-28px)} }
+
+    .err-container {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      padding: 2.5rem 2rem;
+      max-width: 560px;
+      animation: reveal 0.7s cubic-bezier(.4,0,.2,1) both;
+    }
+    @keyframes reveal {
+      from { opacity:0; transform:translateY(28px) scale(0.97); }
+      to   { opacity:1; transform:translateY(0)    scale(1); }
+    }
+    .err-glass {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(220,38,38,0.14);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(220,38,38,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .err-glass::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ef4444, transparent);
+      opacity: 0.7;
+    }
+    .err-code {
+      font-size: 9rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -10px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #fff5f5 50%, #ef4444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.25rem;
+      filter: drop-shadow(0 0 40px rgba(239,68,68,0.38));
+      animation: shake-code 8s ease-in-out infinite;
+    }
+    @keyframes shake-code {
+      0%,85%,100% { transform:translateX(0) rotate(0); }
+      88%  { transform:translateX(-5px) rotate(-1deg); }
+      91%  { transform:translateX(5px)  rotate(1deg); }
+      94%  { transform:translateX(-3px) rotate(-0.5deg); }
+      97%  { transform:translateX(3px)  rotate(0.5deg); }
+    }
+    .err-icon-wrap {
+      width: 86px; height: 86px;
+      background: rgba(220,38,38,0.1);
+      border-radius: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.75rem;
+      font-size: 2.4rem;
+      color: #f87171;
+      border: 1px solid rgba(220,38,38,0.22);
+      animation: icon-pulse 3s ease-in-out infinite;
+    }
+    @keyframes icon-pulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(220,38,38,0); }
+      50%      { box-shadow:0 0 0 14px rgba(220,38,38,0.07); }
+    }
+    .err-title { font-size:1.75rem; font-weight:900; margin-bottom:0.85rem; letter-spacing:-0.5px; }
+    .err-desc { color:rgba(255,255,255,0.5); font-size:0.93rem; line-height:1.75; margin-bottom:2.5rem; }
+    .err-actions { display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap; }
+    .err-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(220,38,38,0.1);
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.72rem;
+      color: #f87171;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .btn-err-primary {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 0.85rem 2.25rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(.4,0,.2,1);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      box-shadow: 0 6px 22px rgba(220,38,38,0.38);
+    }
+    .btn-err-primary:hover { color:#fff; transform:translateY(-3px) scale(1.02); box-shadow:0 12px 32px rgba(220,38,38,0.55); }
+    .btn-err-ghost {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.72);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 0.85rem 2.25rem;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      backdrop-filter: blur(8px);
+    }
+    .btn-err-ghost:hover { color:#fff; background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.22); transform:translateY(-2px); }
+    .err-footer { margin-top:2rem; color:rgba(255,255,255,0.17); font-size:0.7rem; letter-spacing:0.5px; }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="grid-pattern"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="err-container">
+    <div class="err-glass">
+      <div class="err-code">500</div>
+      <div class="err-status"><span class="status-dot"></span> خطأ في الخادم</div>
+      <div class="err-icon-wrap"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="err-title">حدث خطأ غير متوقع</div>
+      <p class="err-desc">
+        عذراً، حدث خطأ في الخادم بشكل غير متوقع.<br>
+        فريقنا التقني على علم بالمشكلة وسيتم حلها في أقرب وقت.
+      </p>
+      <div class="err-actions">
+        <a href="/" class="btn-err-primary">
+          <i class="fas fa-home"></i> الصفحة الرئيسية
+        </a>
+        <a href="javascript:location.reload()" class="btn-err-ghost">
+          <i class="fas fa-redo-alt"></i> إعادة التحميل
+        </a>
+      </div>
+    </div>
+    <div class="err-footer">© 2025 جامعة السودان للعلوم والتكنولوجيا — SUST TMS</div>
+  </div>
+</body>
+</html>

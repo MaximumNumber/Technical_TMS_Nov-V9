@@ -1,0 +1,476 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}نظام إدارة الجداول الدراسية{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/tms-premium.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Page progress bar -->
+<div id="page-progress" style="width:0;opacity:0;"></div>
+
+{% if user.is_authenticated %}
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🎓</div>
+    <div class="brand-title">نظام الجداول الدراسية</div>
+    <div class="brand-sub">جامعة السودان للعلوم والتكنولوجيا</div>
+  </div>
+
+  <ul class="sidebar-nav" id="sidebarNav">
+
+    {% if user.user_type == 'system_manager' %}
+      <li class="nav-item">
+        <a href="{% url 'system_manager_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'system_manager_dashboard' %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> لوحة التحكم
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'analytics_dashboard' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-chart-bar"></i></span> التحليلات
+        </a>
+      </li>
+      <div class="sidebar-section">الهيكل الأكاديمي</div>
+      <li class="nav-item">
+        <a href="{% url 'university_list' %}" class="nav-link {% if 'university' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-university"></i></span> الجامعات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'branch_list' %}" class="nav-link {% if 'branch' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-code-branch"></i></span> الفروع
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'college_list' %}" class="nav-link {% if 'college' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-building"></i></span> الكليات
+        </a>
+      </li>
+      <div class="sidebar-section">المرافق</div>
+      <li class="nav-item">
+        <a href="{% url 'room_list_admin' %}" class="nav-link {% if 'room' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-door-open"></i></span> القاعات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'hall_list_admin' %}" class="nav-link {% if 'hall' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-flask"></i></span> المعامل
+        </a>
+      </li>
+      <div class="sidebar-section">المستخدمون والجداول</div>
+      <li class="nav-item">
+        <a href="{% url 'user_list_admin' %}" class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-users"></i></span> المستخدمون
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'all_schedules_admin' %}" class="nav-link {% if 'all_schedules' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span> الجداول
+        </a>
+      </li>
+      <div class="sidebar-section">الأدوات</div>
+      <li class="nav-item">
+        <a href="{% url 'changelog_list' %}" class="nav-link {% if 'changelog' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-history"></i></span> سجل التغييرات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'export_import_page' %}" class="nav-link {% if 'export' in request.resolver_match.url_name or 'import' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-file-export"></i></span> تصدير / استيراد
+        </a>
+      </li>
+
+    {% elif user.user_type == 'college_manager' %}
+      <li class="nav-item">
+        <a href="{% url 'college_manager_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'college_manager_dashboard' %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> لوحة التحكم
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'analytics_dashboard' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-chart-bar"></i></span> التحليلات
+        </a>
+      </li>
+      <div class="sidebar-section">إدارة الكلية</div>
+      <li class="nav-item">
+        <a href="{% url 'cm_department_list' %}" class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-sitemap"></i></span> الأقسام
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_dept_head_list' %}" class="nav-link {% if 'dept_head' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-users-cog"></i></span> رؤساء الأقسام
+        </a>
+      </li>
+      <div class="sidebar-section">الأدوات</div>
+      <li class="nav-item">
+        <a href="{% url 'changelog_list' %}" class="nav-link {% if 'changelog' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-history"></i></span> سجل التغييرات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'notifications_center' %}" class="nav-link {% if 'notifications_center' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-bell"></i></span>
+          الإشعارات
+          <span class="notif-badge-sidebar ms-auto" id="sidebarNotifBadge" style="display:none;"></span>
+        </a>
+      </li>
+
+    {% elif user.user_type == 'department_head' %}
+      <li class="nav-item">
+        <a href="{% url 'college_manager_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'college_manager_dashboard' %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> لوحة التحكم
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'analytics_dashboard' %}" class="nav-link {% if 'analytics' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-chart-bar"></i></span> التحليلات
+        </a>
+      </li>
+      <div class="sidebar-section">المقررات</div>
+      <li class="nav-item">
+        <a href="{% url 'cm_academic_periods' %}" class="nav-link {% if 'academic_period' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-calendar"></i></span> السنوات والفصول
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_course_list' %}" class="nav-link {% if 'course' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-book"></i></span> المواد الدراسية
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_specialization_list' %}" class="nav-link {% if 'specialization' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span> التخصصات
+        </a>
+      </li>
+      <div class="sidebar-section">الكوادر والمرافق</div>
+      <li class="nav-item">
+        <a href="{% url 'cm_instructor_list' %}" class="nav-link {% if 'instructor' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-chalkboard-teacher"></i></span> الأساتذة
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_student_list' %}" class="nav-link {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-user-graduate"></i></span> الطلاب
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_room_list' %}" class="nav-link {% if 'cm_room' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-door-open"></i></span> القاعات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_hall_list' %}" class="nav-link {% if 'cm_hall' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-flask"></i></span> المعامل
+        </a>
+      </li>
+      <div class="sidebar-section">الجداول</div>
+      <li class="nav-item">
+        <a href="{% url 'cm_lecture_schedule' %}" class="nav-link {% if 'lecture_schedule' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-calendar-week"></i></span> جداول المحاضرات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_lab_schedule' %}" class="nav-link {% if 'lab_schedule' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-microscope"></i></span> جداول المعامل
+        </a>
+      </li>
+      <div class="sidebar-section">التقارير</div>
+      <li class="nav-item">
+        <a href="{% url 'cm_requests_list' %}" class="nav-link {% if 'request' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-exchange-alt"></i></span> طلبات التغيير
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_report_professor' %}" class="nav-link {% if 'report_professor' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-file-alt"></i></span> تقرير الأستاذ
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'cm_report_room' %}" class="nav-link {% if 'report_room' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-door-open"></i></span> تقرير القاعة
+        </a>
+      </li>
+      <div class="sidebar-section">الأدوات</div>
+      <li class="nav-item">
+        <a href="{% url 'changelog_list' %}" class="nav-link {% if 'changelog' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-history"></i></span> سجل التغييرات
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'export_import_page' %}" class="nav-link {% if 'export' in request.resolver_match.url_name or 'import' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-file-export"></i></span> تصدير / استيراد
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'notifications_center' %}" class="nav-link {% if 'notifications_center' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-bell"></i></span>
+          الإشعارات
+          <span class="notif-badge-sidebar ms-auto" id="sidebarNotifBadge" style="display:none;"></span>
+        </a>
+      </li>
+
+    {% elif user.user_type == 'professor' %}
+      <li class="nav-item">
+        <a href="{% url 'professor_schedule' %}" class="nav-link {% if 'professor_schedule' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span> جدولي الدراسي
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'professor_requests' %}" class="nav-link {% if 'professor_request' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-exchange-alt"></i></span> طلبات التغيير
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'notifications_center' %}" class="nav-link {% if 'notifications_center' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-bell"></i></span>
+          الإشعارات
+          <span class="notif-badge-sidebar ms-auto" id="sidebarNotifBadge" style="display:none;"></span>
+        </a>
+      </li>
+
+    {% elif user.user_type == 'student' %}
+      <li class="nav-item">
+        <a href="{% url 'student_schedule' %}" class="nav-link {% if 'student_schedule' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span> جدولي الدراسي
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'notifications_center' %}" class="nav-link {% if 'notifications_center' in request.resolver_match.url_name %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-bell"></i></span>
+          الإشعارات
+          <span class="notif-badge-sidebar ms-auto" id="sidebarNotifBadge" style="display:none;"></span>
+        </a>
+      </li>
+    {% endif %}
+
+    <div class="sidebar-section">الحساب</div>
+    <li class="nav-item">
+      <a href="{% url 'account_settings' %}" class="nav-link {% if 'account_settings' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-user-cog"></i></span> إعدادات الحساب
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'public_schedule' %}" class="nav-link">
+        <span class="nav-icon"><i class="fas fa-globe"></i></span> الجدول العام
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">
+      {{ user.full_name|first|default:"U" }}
+    </div>
+    <div style="overflow:hidden;flex:1;">
+      <div class="user-name">{{ user.full_name }}</div>
+      <div class="user-role">{{ user.get_user_type_display }}</div>
+    </div>
+    <button id="darkToggle" title="وضع ليلي / نهاري" onclick="toggleDarkMode()">
+      <i class="fas fa-moon" id="darkIcon"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+    </div>
+    <div class="topbar-right">
+      <a href="{% url 'notifications_center' %}" class="topbar-btn notif-badge-topbar" title="الإشعارات">
+        <i class="fas fa-bell"></i>
+        <span class="badge-dot" id="topbarNotifBadge" style="display:none;"></span>
+      </a>
+      <span class="topbar-greeting d-none d-md-inline">مرحباً، <strong>{{ user.full_name }}</strong></span>
+      <a href="{% url 'logout' %}" class="btn-logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="d-none d-sm-inline">خروج</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="content-area">
+    {% if messages %}
+      <div id="django-messages-data" style="display:none;">
+        {% for message in messages %}
+          <span data-type="{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}" data-text="{{ message }}"></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<div class="tms-toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ── SIDEBAR ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+/* ── PAGE PROGRESS BAR ── */
+(function(){
+  const bar = document.getElementById('page-progress');
+  if (!bar) return;
+  let w = 0;
+  bar.style.width = '0%';
+  bar.style.opacity = '1';
+  const iv = setInterval(function(){
+    w += Math.random() * 18;
+    if (w > 85) w = 85;
+    bar.style.width = w + '%';
+  }, 120);
+  window.addEventListener('load', function(){
+    clearInterval(iv);
+    bar.style.width = '100%';
+    setTimeout(function(){ bar.style.opacity = '0'; bar.style.width = '0'; }, 500);
+  });
+})();
+
+/* ── TOAST SYSTEM ── */
+function showToast(message, type, duration) {
+  duration = duration || 4500;
+  const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = 'tms-toast ' + (type || 'info');
+  t.innerHTML = '<div class="tms-toast-icon"><i class="fas ' + (icons[type] || icons.info) + '"></i></div>' +
+                '<div style="flex:1;">' + message + '</div>' +
+                '<button onclick="this.parentElement.remove()" style="background:none;border:none;font-size:1rem;cursor:pointer;opacity:0.5;color:inherit;padding:0 0.25rem;">×</button>';
+  t.querySelector('button').style.cssText = 'background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0.45;color:inherit;padding:0 0.2rem;line-height:1;';
+  container.appendChild(t);
+  setTimeout(function(){ if (t.parentElement) t.remove(); }, duration);
+}
+
+/* ── CONVERT DJANGO MESSAGES TO TOASTS ── */
+(function(){
+  const el = document.getElementById('django-messages-data');
+  if (!el) return;
+  el.querySelectorAll('[data-text]').forEach(function(s) {
+    const map = { success:'success', error:'error', warning:'warning', info:'info', danger:'error' };
+    showToast(s.dataset.text, map[s.dataset.type] || 'info');
+  });
+})();
+
+/* ── COUNT-UP ANIMATION ── */
+function countUp(el) {
+  const target = parseFloat(el.textContent.replace(/[^0-9.]/g, ''));
+  if (isNaN(target) || target === 0) return;
+  const dur = 1200;
+  const step = 16;
+  const inc = target / (dur / step);
+  let cur = 0;
+  const isInt = Number.isInteger(target);
+  const iv = setInterval(function(){
+    cur += inc;
+    if (cur >= target) { cur = target; clearInterval(iv); }
+    el.textContent = isInt ? Math.round(cur) : cur.toFixed(1);
+  }, step);
+}
+
+/* ── RIPPLE EFFECT ── */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.btn, .btn-save, .btn-tms, .btn-delete-confirm, .btn-login');
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const size = Math.max(rect.width, rect.height);
+  r.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + (e.clientX - rect.left - size/2) + 'px;top:' + (e.clientY - rect.top - size/2) + 'px;';
+  btn.appendChild(r);
+  setTimeout(function(){ r.remove(); }, 700);
+});
+
+/* ── SCROLL REVEAL + COUNT-UP ON STAT CARDS ── */
+(function(){
+  const obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        const vals = entry.target.querySelectorAll('.stat-value');
+        vals.forEach(countUp);
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal, .stat-card').forEach(function(el) {
+    obs.observe(el);
+  });
+  document.querySelectorAll('.fade-in-up, .fade-in-up-1, .fade-in-up-2, .fade-in-up-3, .fade-in-up-4').forEach(function(el) {
+    const vals = el.querySelectorAll('.stat-value');
+    if (vals.length) {
+      setTimeout(function(){ vals.forEach(countUp); }, 400);
+    }
+  });
+})();
+
+/* ── DARK MODE ── */
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('tms-dark', isDark ? '1' : '0');
+  const ic = document.getElementById('darkIcon');
+  if (ic) ic.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+}
+(function(){
+  if (localStorage.getItem('tms-dark') === '1') {
+    document.body.classList.add('dark');
+    const ic = document.getElementById('darkIcon');
+    if (ic) ic.className = 'fas fa-sun';
+  }
+})();
+
+/* ── NOTIFICATION POLLING ── */
+(function pollNotifs() {
+  const topBadge = document.getElementById('topbarNotifBadge');
+  const sideBadge = document.getElementById('sidebarNotifBadge');
+  if (!topBadge) return;
+  function fetchCount() {
+    fetch('/api/unread-count/', { credentials: 'same-origin' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.count > 0) {
+          if (topBadge) { topBadge.style.display = 'flex'; topBadge.textContent = d.count > 9 ? '9+' : d.count; }
+          if (sideBadge) { sideBadge.style.display = 'inline'; sideBadge.textContent = d.count > 9 ? '9+' : d.count; }
+        } else {
+          if (topBadge) topBadge.style.display = 'none';
+          if (sideBadge) sideBadge.style.display = 'none';
+        }
+      }).catch(function(){});
+  }
+  fetchCount();
+  setInterval(fetchCount, 60000);
+})();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

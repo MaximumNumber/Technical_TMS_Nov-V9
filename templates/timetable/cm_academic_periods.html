@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}السنوات والفصول الأكاديمية{% endblock %}
+{% block page_title %}السنوات والفصول الأكاديمية{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-calendar"></i></div>
+    <div><h4>السنوات والفصول الأكاديمية</h4><div class="page-header-sub">إدارة الفترات الأكاديمية للأقسام</div></div>
+  </div>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>القسم</th><th>السنة الدراسية</th><th>الفصل</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for period in periods %}
+        <tr>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ period.department.name }}</span></td>
+          <td><span class="chip">{{ period.year.year_name }}</span></td>
+          <td>
+            {% if period.semester_type == "1" %}<span class="badge-tms badge-primary">الفصل الأول</span>
+            {% else %}<span class="badge-tms badge-info-soft">الفصل الثاني</span>{% endif %}
+          </td>
+          <td>
+            <span class="badge-tms badge-success-soft"><i class="fas fa-check-circle me-1"></i>نشط</span>
+          </td>
+          <td>
+            <a href="{% url 'cm_academic_period_setup' period.department.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-cog me-1"></i>إعداد
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-calendar"></i><p>لا توجد فترات أكاديمية. افتح إعداد القسم لإضافة فترات.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="card mt-4 fade-in-up fade-in-up-2">
+  <div class="card-header card-header-light d-flex align-items-center gap-2">
+    <div style="width:28px;height:28px;background:linear-gradient(135deg,#17616c,#1a7a8a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-sitemap"></i></div>
+    إعداد الفترات حسب القسم
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% for dept in departments %}
+      <div class="col-xl-3 col-md-4 col-sm-6">
+        <a href="{% url 'cm_academic_period_setup' dept.pk %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-sitemap"></i></div>
+          <div class="qa-label">{{ dept.name }}</div>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty-state"><p>لا توجد أقسام</p></div></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

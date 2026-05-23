@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load timetable_tags %}
+{% block title %}جدولي الدراسي{% endblock %}
+{% block page_title %}جدولي الدراسي{% endblock %}
+{% block content %}
+<div class="print-header">
+  <h3 style="margin:0;color:#0a3341;">الجدول الدراسي — {{ student.name }}</h3>
+  {% if period %}<p style="color:#5a7a84;margin:4px 0;">{{ period.department.name }} / {{ period.year.year_name }} / فصل {{ period.semester_type }}</p>{% endif %}
+  <p style="color:#8a9ba5;font-size:0.8rem;margin:0;">جامعة السودان للعلوم والتكنولوجيا</p>
+</div>
+<div style="background:linear-gradient(135deg,#1a0533,#3a1260,#6b3fa0);border-radius:18px;padding:1.5rem 2rem;margin-bottom:1.75rem;position:relative;overflow:hidden;" class="fade-in-up">
+  <div style="position:absolute;left:-30px;top:-30px;width:180px;height:180px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3" style="position:relative;z-index:1;">
+    <div>
+      <div style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:0.25rem;">الجدول الأكاديمي للطالب</div>
+      <h3 style="color:#fff;font-weight:900;margin:0;font-size:1.4rem;"><i class="fas fa-calendar-alt me-2" style="color:#c084fc;"></i>جدولي الدراسي</h3>
+      {% if period %}<div style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-top:0.25rem;">{{ period.department.name }} / {{ period.year.year_name }} / فصل {{ period.semester_type }}</div>{% endif %}
+    </div>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:0.75rem 1.25rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:#fff;">{{ lectures|length }}</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">محاضرة</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:0.75rem 1.25rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:900;color:#fff;">{{ labs|length }}</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">معمل</div>
+      </div>
+      <button onclick="window.print()" class="btn-print no-print" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);align-self:center;">
+        <i class="fas fa-print"></i> طباعة / PDF
+      </button>
+    </div>
+  </div>
+</div>
+{% if notifications %}
+<div class="alert alert-info mb-4 fade-in-up"><i class="fas fa-bell me-2"></i><strong>إشعارات:</strong>
+  {% for n in notifications|slice:":3" %}<div class="small mt-1">• {{ n.message }}</div>{% endfor %}
+</div>
+{% endif %}
+<div class="card mb-4 fade-in-up fade-in-up-1" style="border-radius:18px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#4a1a6b,#7d3c98);padding:1rem 1.25rem;">
+    <div style="color:#fff;font-weight:700;font-size:0.9rem;"><i class="fas fa-table me-2" style="color:#c084fc;"></i>الجدول الأسبوعي</div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-bordered schedule-table mb-0" style="background:#fafcfe;">
+      <thead><tr>{% for day in day_order %}<th class="text-center">{{ day_names|get_item:day }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        <tr>
+          {% for day in day_order %}
+          <td class="align-top p-2" style="min-width:130px;">
+            {% for item in schedule_grid|get_item:day %}
+              {% if item.type == 'lecture' %}
+              <div class="lecture-block">
+                <div style="font-weight:700;color:#0a3d47;font-size:0.8rem;">{{ item.obj.course.course_name }}</div>
+                <div style="font-size:0.7rem;color:#4a7a84;"><i class="fas fa-clock" style="font-size:0.6rem;"></i> {{ item.obj.start_time|time:"H:i" }}-{{ item.obj.end_time|time:"H:i" }}</div>
+                <div style="font-size:0.7rem;color:#4a7a84;"><i class="fas fa-user-tie" style="font-size:0.6rem;"></i> {{ item.obj.professor.name }}</div>
+                <div style="font-size:0.7rem;color:#4a7a84;"><i class="fas fa-door-open" style="font-size:0.6rem;"></i> {{ item.obj.room.name }}</div>
+              </div>
+              {% else %}
+              <div class="lab-block">
+                <div style="font-weight:700;color:#7a4500;font-size:0.8rem;">{{ item.obj.course.course_name }}</div>
+                <div style="font-size:0.7rem;color:#8a6020;"><i class="fas fa-clock" style="font-size:0.6rem;"></i> {{ item.obj.start_time|time:"H:i" }}-{{ item.obj.end_time|time:"H:i" }}</div>
+                <div style="font-size:0.7rem;color:#8a6020;"><i class="fas fa-user-tie" style="font-size:0.6rem;"></i> {{ item.obj.professor.name }}</div>
+                <div style="font-size:0.7rem;color:#8a6020;"><i class="fas fa-flask" style="font-size:0.6rem;"></i> {{ item.obj.hall.name }}</div>
+                {% if item.obj.group_number %}<div style="font-size:0.65rem;color:#8a6020;">مجموعة {{ item.obj.group_number }}</div>{% endif %}
+              </div>
+              {% endif %}
+            {% empty %}
+              <div class="text-center py-3" style="color:#c5d5db;font-size:0.78rem;">—</div>
+            {% endfor %}
+          </td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="row g-4 fade-in-up fade-in-up-2">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header" style="background:linear-gradient(135deg,#e8f6f8,#d0eef4);border-bottom:2px solid #b0e0ea;">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:28px;height:28px;background:linear-gradient(135deg,#17616c,#1a7a8a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-chalkboard"></i></div>
+          <span style="color:#0a3341;font-weight:700;">المحاضرات</span>
+          <span class="badge-tms badge-primary ms-auto">{{ lectures|length }}</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tms-table">
+          <thead><tr><th>المادة</th><th>الأستاذ</th><th>اليوم</th><th>الوقت</th><th>القاعة</th></tr></thead>
+          <tbody>
+            {% for lec in lectures %}
+            <tr>
+              <td><span class="fw-semibold" style="color:#0d5263;">{{ lec.course.course_name }}</span></td>
+              <td style="font-size:0.8rem;">{{ lec.professor.name }}</td>
+              <td><span class="chip">{{ lec.day_of_week|day_arabic }}</span></td>
+              <td style="font-size:0.78rem;">{{ lec.start_time|time:"H:i" }}-{{ lec.end_time|time:"H:i" }}</td>
+              <td style="font-size:0.8rem;">{{ lec.room.name }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="empty-state" style="padding:1.5rem;"><p>لا توجد محاضرات</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header" style="background:linear-gradient(135deg,#fff8e7,#fdebd0);border-bottom:2px solid #ffd580;">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:28px;height:28px;background:linear-gradient(135deg,#f5a623,#e0941a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-flask"></i></div>
+          <span style="color:#7a4500;font-weight:700;">المعامل</span>
+          <span class="badge-tms badge-warning-soft ms-auto">{{ labs|length }}</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tms-table">
+          <thead><tr><th>المادة</th><th>الأستاذ</th><th>اليوم</th><th>الوقت</th><th>المعمل</th></tr></thead>
+          <tbody>
+            {% for lab in labs %}
+            <tr>
+              <td><span class="fw-semibold" style="color:#7a4500;">{{ lab.course.course_name }}</span></td>
+              <td style="font-size:0.8rem;">{{ lab.professor.name }}</td>
+              <td><span class="chip">{{ lab.day_of_week|day_arabic }}</span></td>
+              <td style="font-size:0.78rem;">{{ lab.start_time|time:"H:i" }}-{{ lab.end_time|time:"H:i" }}</td>
+              <td style="font-size:0.8rem;">{{ lab.hall.name }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="empty-state" style="padding:1.5rem;"><p>لا توجد معامل</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

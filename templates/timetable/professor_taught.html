@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل محاضرة{% endblock %}
+{% block page_title %}تسجيل محاضرة مُدَرَّسة{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,#27ae60,#2ecc71);"><i class="fas fa-check-circle"></i></div>
+    <div><h4>تسجيل محاضرة كمُدَرَّسة</h4></div>
+  </div>
+  <a href="{% url 'professor_schedule' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+<div class="row justify-content-center fade-in-up fade-in-up-1">
+  <div class="col-xl-5 col-lg-7">
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-bottom:2px solid #a5d6a7;">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:28px;height:28px;background:linear-gradient(135deg,#27ae60,#2ecc71);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-check"></i></div>
+          <span style="color:#1b5e20;font-weight:700;">تفاصيل المحاضرة</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="background:#f0f8f9;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;border-right:3px solid #17616c;">
+          <div class="fw-bold" style="color:#0a3341;margin-bottom:0.25rem;">{{ schedule.course.course_name }}</div>
+          <div style="font-size:0.82rem;color:#5a7a84;">{{ schedule.department.name }}</div>
+          <div style="font-size:0.82rem;color:#5a7a84;">{{ schedule.get_day_of_week_display }} — {{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}</div>
+          <div style="font-size:0.82rem;color:#5a7a84;"><i class="fas fa-door-open me-1"></i>{{ schedule.room.name }}</div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">تاريخ المحاضرة</label>
+            <input type="date" name="taught_date" class="form-control" value="{{ today }}" required>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn px-4" style="background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-weight:700;">
+              <i class="fas fa-check me-2"></i>تسجيل المحاضرة
+            </button>
+            <a href="{% url 'professor_schedule' %}" class="btn btn-outline-secondary px-4">إلغاء</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

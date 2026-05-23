@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}التخصصات{% endblock %}
+{% block page_title %}إدارة التخصصات{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-graduation-cap"></i></div>
+    <div><h4>التخصصات</h4><div class="page-header-sub">إدارة التخصصات الأكاديمية</div></div>
+  </div>
+  <a href="{% url 'cm_specialization_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i>إضافة تخصص</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>اسم التخصص</th><th>القسم</th><th>الفترة الأكاديمية</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for spec in specializations %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ spec.name }}</span></td>
+          <td style="font-size:0.82rem;">{{ spec.department.name }}</td>
+          <td>
+            {% if spec.period %}<span class="chip">{{ spec.period.year.year_name }} - فصل {{ spec.period.semester_type }}</span>
+            {% else %}<span style="color:#a0b8c1;">—</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'cm_specialization_delete' spec.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-graduation-cap"></i><p>لا توجد تخصصات</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

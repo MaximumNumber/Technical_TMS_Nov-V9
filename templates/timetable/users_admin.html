@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}المستخدمون{% endblock %}
+{% block page_title %}إدارة المستخدمين{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-users"></i></div>
+    <div><h4>المستخدمون</h4><div class="page-header-sub">إدارة حسابات المستخدمين</div></div>
+  </div>
+  <a href="{% url 'college_manager_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-user-plus me-1"></i> إضافة مدير كلية</a>
+</div>
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2 d-flex gap-2 align-items-center flex-wrap">
+    <span style="font-size:0.8rem;color:#7a9ba5;font-weight:600;">تصفية:</span>
+    <a href="{% url 'user_list_admin' %}" class="btn btn-xs {% if not selected_type %}btn-tms{% else %}btn-outline-secondary{% endif %}">الكل</a>
+    <a href="{% url 'user_list_admin' %}?type=system_manager" class="btn btn-xs {% if selected_type == 'system_manager' %}btn-tms{% else %}btn-outline-secondary{% endif %}">مديرو النظام</a>
+    <a href="{% url 'user_list_admin' %}?type=college_manager" class="btn btn-xs {% if selected_type == 'college_manager' %}btn-tms{% else %}btn-outline-secondary{% endif %}">مديرو الكليات</a>
+    <a href="{% url 'user_list_admin' %}?type=professor" class="btn btn-xs {% if selected_type == 'professor' %}btn-tms{% else %}btn-outline-secondary{% endif %}">الأساتذة</a>
+    <a href="{% url 'user_list_admin' %}?type=student" class="btn btn-xs {% if selected_type == 'student' %}btn-tms{% else %}btn-outline-secondary{% endif %}">الطلاب</a>
+  </div>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>الاسم الكامل</th><th>اسم المستخدم</th><th>البريد</th><th>النوع</th><th>الكلية/القسم</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#17616c,#1a7a8a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">{{ u.full_name|first }}</div>
+              <span class="fw-semibold" style="color:#0d5263;">{{ u.full_name }}</span>
+            </div>
+          </td>
+          <td><code style="background:#f0f4f8;color:#17616c;border-radius:6px;padding:2px 6px;font-size:0.78rem;">{{ u.username }}</code></td>
+          <td style="font-size:0.82rem;color:#5a7a84;">{{ u.email|default:"—" }}</td>
+          <td>
+            {% if u.user_type == 'system_manager' %}<span class="badge-tms badge-danger-soft">مدير النظام</span>
+            {% elif u.user_type == 'college_manager' %}<span class="badge-tms badge-primary">مدير كلية</span>
+            {% elif u.user_type == 'professor' %}<span class="badge-tms badge-success-soft">أستاذ</span>
+            {% elif u.user_type == 'student' %}<span class="badge-tms badge-info-soft">طالب</span>
+            {% else %}<span class="badge-tms">{{ u.user_type }}</span>{% endif %}
+          </td>
+          <td style="font-size:0.82rem;">
+            {% if u.college %}{{ u.college.name }}{% elif u.department %}{{ u.department.name }}{% else %}—{% endif %}
+          </td>
+          <td>
+            {% if u.is_active %}<span class="badge-tms badge-success-soft"><i class="fas fa-check-circle me-1"></i>نشط</span>
+            {% else %}<span class="badge-tms badge-danger-soft">غير نشط</span>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <span class="btn btn-icon btn-outline-secondary" title="عرض" style="opacity:0.5;cursor:default;"><i class="fas fa-user"></i></span>
+              {% if u.user_type != 'system_manager' %}
+              <a href="{% url 'user_delete_admin' u.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><i class="fas fa-users"></i><p>لا يوجد مستخدمون</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

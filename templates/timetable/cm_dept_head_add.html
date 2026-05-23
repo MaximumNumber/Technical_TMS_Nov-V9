@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}إضافة رئيس قسم{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+      <div class="d-flex align-items-center mb-4 gap-2">
+        <a href="{% url 'cm_dept_head_list' %}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+        <div>
+          <h4 class="fw-bold mb-0" style="color:#0a3d47;"><i class="fas fa-user-plus me-2" style="color:#17616c;"></i>إضافة رئيس قسم</h4>
+          <p class="text-muted small mb-0">{{ college.name }}</p>
+        </div>
+      </div>
+
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+            {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="card border-0 shadow-sm" style="border-radius:18px;">
+        <div class="card-header py-3" style="background:linear-gradient(135deg,#0a3341,#17616c);border-radius:18px 18px 0 0;">
+          <h6 class="mb-0 text-white fw-bold"><i class="fas fa-id-card me-2"></i>بيانات رئيس القسم الجديد</h6>
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-600" style="color:#4a6872;font-size:.85rem;">الاسم الكامل <span class="text-danger">*</span></label>
+              <input type="text" name="full_name" class="form-control" placeholder="مثال: د. محمد أحمد" required style="border-radius:10px;border:2px solid #dce5ee;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-600" style="color:#4a6872;font-size:.85rem;">اسم المستخدم <span class="text-danger">*</span></label>
+              <input type="text" name="username" class="form-control" placeholder="مثال: head_cs" required style="border-radius:10px;border:2px solid #dce5ee;" dir="ltr">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-600" style="color:#4a6872;font-size:.85rem;">البريد الإلكتروني</label>
+              <input type="email" name="email" class="form-control" placeholder="مثال: head@sust.edu" style="border-radius:10px;border:2px solid #dce5ee;" dir="ltr">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-600" style="color:#4a6872;font-size:.85rem;">القسم <span class="text-danger">*</span></label>
+              <select name="department_id" class="form-select" required style="border-radius:10px;border:2px solid #dce5ee;">
+                <option value="">اختر القسم...</option>
+                {% for dept in departments %}
+                <option value="{{ dept.pk }}">{{ dept.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-600" style="color:#4a6872;font-size:.85rem;">كلمة المرور <span class="text-danger">*</span></label>
+              <input type="password" name="password" class="form-control" placeholder="كلمة مرور قوية" required style="border-radius:10px;border:2px solid #dce5ee;" dir="ltr">
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary flex-fill" style="background:#17616c;border-color:#17616c;border-radius:10px;">
+                <i class="fas fa-save me-1"></i> حفظ رئيس القسم
+              </button>
+              <a href="{% url 'cm_dept_head_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;">إلغاء</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

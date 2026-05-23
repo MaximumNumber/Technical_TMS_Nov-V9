@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load timetable_tags %}
+{% block title %}جداول المعامل{% endblock %}
+{% block page_title %}جداول المعامل{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,#e67e22,#f39c12);"><i class="fas fa-microscope"></i></div>
+    <div><h4>جداول المعامل</h4><div class="page-header-sub">إدارة وعرض جداول المعامل الأسبوعية</div></div>
+  </div>
+  <a href="{% url 'cm_lab_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-plus me-1"></i>إضافة جدول معمل</a>
+</div>
+
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2">
+    <div class="d-flex gap-2 align-items-end flex-wrap">
+      <div>
+        <label class="form-label" style="font-size:0.78rem;">القسم</label>
+        <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
+          <option value="">كل الأقسام</option>
+          {% for dept in departments %}
+          <option value="{{ dept.pk }}" {% if selected_dept == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="button" onclick="clearFilters()" id="clearBtn" class="btn btn-xs btn-outline-danger align-self-end" style="{% if not selected_dept %}display:none{% endif %}">إلغاء</button>
+      <span id="filterSpinner" class="text-muted align-self-end" style="font-size:0.78rem;display:none;"><i class="fas fa-circle-notch fa-spin me-1"></i>جاري التحميل...</span>
+    </div>
+  </div>
+</div>
+
+{% if conflict_ids %}
+<div class="fade-in-up no-print" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-right:4px solid #ef4444;border-radius:12px;color:#991b1b;font-size:0.85rem;font-weight:600;padding:0.75rem 1rem;margin-bottom:1rem;">
+  <i class="fas fa-exclamation-triangle me-2" style="color:#ef4444;"></i>
+  تم اكتشاف <strong>{{ conflict_ids|length }}</strong> معمل بها تعارض في الوقت أو القاعة أو الأستاذ.
+</div>
+{% endif %}
+
+<div id="scheduleContent">
+
+<div id="bulkBar" class="bulk-action-bar no-print">
+  <input type="checkbox" id="selectAll" class="bulk-select-all" onchange="toggleSelectAll(this)" title="تحديد الكل">
+  <span>تم تحديد <span class="bulk-count" id="bulkCount">0</span> معمل</span>
+  <button onclick="bulkDelete()" class="btn btn-danger btn-sm ms-auto"><i class="fas fa-trash me-1"></i>حذف المحدد</button>
+</div>
+
+<div class="card fade-in-up fade-in-up-1">
+  <div class="card-header card-header-light d-flex align-items-center gap-2">
+    <i class="fas fa-flask" style="color:#e67e22;"></i><strong>قائمة المعامل</strong>
+    <span style="background:rgba(230,126,34,0.1);color:#e67e22;border-radius:6px;padding:1px 8px;font-size:0.75rem;">{{ schedules|length }}</span>
+    <div class="ms-auto d-flex gap-2 no-print">
+      <button onclick="window.print()" class="btn-print" style="font-size:0.78rem;padding:0.3rem 0.75rem;"><i class="fas fa-print"></i> طباعة</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead>
+        <tr>
+          <th class="no-print" style="width:36px;"><input type="checkbox" class="bulk-select-all" onchange="toggleSelectAll(this)"></th>
+          <th>المادة</th><th>القسم</th><th>الأستاذ</th><th>المساعد</th><th>اليوم</th><th>الوقت</th><th>المعمل</th><th>المجموعة</th><th class="no-print">الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in schedules %}
+        <tr class="{% if s.pk in conflict_ids %}conflict-row{% endif %}" data-pk="{{ s.pk }}">
+          <td class="no-print"><input type="checkbox" class="row-checkbox" value="{{ s.pk }}" onchange="updateBulkBar()"></td>
+          <td>
+            <span class="fw-semibold" style="color:#7a4500;">{{ s.course.course_name }}</span>
+            {% if s.pk in conflict_ids %}<span class="conflict-badge ms-1"><i class="fas fa-exclamation-triangle" style="font-size:0.6rem;"></i> تعارض</span>{% endif %}
+          </td>
+          <td style="font-size:0.82rem;">{{ s.department.name }}</td>
+          <td style="font-size:0.82rem;">{{ s.professor.name }}</td>
+          <td style="font-size:0.82rem;">{{ s.assistant.name|default:"—" }}</td>
+          <td><span class="chip">{{ s.day_of_week|day_arabic }}</span></td>
+          <td style="font-size:0.78rem;font-variant-numeric:tabular-nums;">{{ s.start_time|time:"H:i" }}-{{ s.end_time|time:"H:i" }}</td>
+          <td style="font-size:0.82rem;">{{ s.hall.name }}</td>
+          <td>{% if s.group_number %}<span class="badge-tms badge-warning-soft">{{ s.group_number }}</span>{% else %}—{% endif %}</td>
+          <td class="no-print">
+            <div class="d-flex gap-1">
+              <a href="{% url 'cm_lab_edit' s.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <button onclick="openInlineEdit({{ s.pk }}, '{{ s.course.course_name|escapejs }}')" class="btn btn-icon btn-outline-secondary" title="تعديل سريع"><i class="fas fa-bolt"></i></button>
+              <button onclick="confirmDelete('{% url 'cm_lab_delete' s.pk %}', '{{ s.course.course_name|escapejs }}')" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10"><div class="empty-state"><i class="fas fa-flask"></i><p>لا توجد جداول معامل</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;font-family:'Tajawal',sans-serif;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#922b21,#e74c3c);border-radius:16px 16px 0 0;color:#fff;">
+        <h6 class="modal-title fw-800"><i class="fas fa-trash me-2"></i>تأكيد الحذف</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p style="font-size:0.95rem;">هل أنت متأكد من حذف جدول المعمل<br><strong id="deleteName" style="color:#c0392b;"></strong>؟</p>
+        <p class="text-muted" style="font-size:0.82rem;">لا يمكن التراجع عن هذا الإجراء.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <form id="deleteForm" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>حذف</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inline Edit Modal -->
+<div class="modal fade inline-edit-modal" id="inlineEditModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-800"><i class="fas fa-bolt me-2"></i>تعديل سريع</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="inlineCourseName" style="font-weight:700;color:#0a3341;font-size:0.9rem;margin-bottom:0.75rem;"></div>
+        <div class="mb-3">
+          <label class="form-label" style="font-size:0.78rem;font-weight:700;">اليوم</label>
+          <select id="ieDay" class="form-select form-select-sm">
+            <option value="Saturday">السبت</option><option value="Sunday">الأحد</option>
+            <option value="Monday">الاثنين</option><option value="Tuesday">الثلاثاء</option>
+            <option value="Wednesday">الأربعاء</option><option value="Thursday">الخميس</option>
+          </select>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label" style="font-size:0.78rem;font-weight:700;">من</label>
+            <input type="time" id="ieStart" class="form-control form-control-sm">
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:0.78rem;font-weight:700;">إلى</label>
+            <input type="time" id="ieEnd" class="form-control form-control-sm">
+          </div>
+        </div>
+        <div id="ieSaving" style="display:none;text-align:center;color:#17616c;font-size:0.82rem;padding:0.5rem;"><i class="fas fa-circle-notch fa-spin me-1"></i>جاري الحفظ...</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-tms btn-sm" onclick="saveInlineEdit()"><i class="fas fa-save me-1"></i>حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const baseUrl = '{% url "cm_lab_schedule" %}';
+const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+let currentInlinePk = null;
+
+function applyFilters() {
+  const dept = document.getElementById('deptFilter').value;
+  const params = new URLSearchParams();
+  if (dept) params.set('dept_id', dept);
+  const url = baseUrl + (params.toString() ? '?' + params.toString() : '');
+  window.history.pushState({}, '', url);
+  document.getElementById('filterSpinner').style.display = '';
+  document.getElementById('clearBtn').style.display = dept ? '' : 'none';
+  fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newContent = doc.getElementById('scheduleContent');
+      if (newContent) document.getElementById('scheduleContent').innerHTML = newContent.innerHTML;
+      document.getElementById('filterSpinner').style.display = 'none';
+    })
+    .catch(() => { window.location.href = url; });
+}
+
+function clearFilters() {
+  document.getElementById('deptFilter').value = '';
+  applyFilters();
+}
+
+function confirmDelete(url, name) {
+  document.getElementById('deleteName').textContent = name;
+  document.getElementById('deleteForm').action = url;
+  new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+function updateBulkBar() {
+  const checked = document.querySelectorAll('.row-checkbox:checked').length;
+  const bar = document.getElementById('bulkBar');
+  const cnt = document.getElementById('bulkCount');
+  if (cnt) cnt.textContent = checked;
+  if (bar) bar.classList.toggle('show', checked > 0);
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.bulk-select-all').forEach(el => el.checked = cb.checked);
+  document.querySelectorAll('.row-checkbox').forEach(el => el.checked = cb.checked);
+  updateBulkBar();
+}
+
+function bulkDelete() {
+  const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(el => el.value);
+  if (!ids.length) return;
+  if (!confirm('هل أنت متأكد من حذف ' + ids.length + ' معمل؟ لا يمكن التراجع.')) return;
+  const fd = new FormData();
+  ids.forEach(id => fd.append('ids[]', id));
+  fetch('{% url "cm_lab_bulk_delete" %}', {
+    method: 'POST', headers: {'X-CSRFToken': csrfToken}, body: fd
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      if (typeof showToast === 'function') showToast('تم حذف ' + d.deleted + ' معمل بنجاح', 'success');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      if (typeof showToast === 'function') showToast(d.error || 'حدث خطأ', 'error');
+    }
+  }).catch(() => location.reload());
+}
+
+function openInlineEdit(pk, courseName) {
+  currentInlinePk = pk;
+  document.getElementById('inlineCourseName').textContent = courseName;
+  document.getElementById('ieSaving').style.display = 'none';
+  fetch('/cm/schedule/labs/' + pk + '/quick-edit/', {credentials: 'same-origin'})
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('ieDay').value = d.day_of_week || '';
+      document.getElementById('ieStart').value = d.start_time || '';
+      document.getElementById('ieEnd').value = d.end_time || '';
+    }).catch(() => {});
+  new bootstrap.Modal(document.getElementById('inlineEditModal')).show();
+}
+
+function saveInlineEdit() {
+  if (!currentInlinePk) return;
+  document.getElementById('ieSaving').style.display = '';
+  const fd = new FormData();
+  fd.append('day_of_week', document.getElementById('ieDay').value);
+  fd.append('start_time', document.getElementById('ieStart').value);
+  fd.append('end_time', document.getElementById('ieEnd').value);
+  fetch('/cm/schedule/labs/' + currentInlinePk + '/quick-edit/', {
+    method: 'POST', headers: {'X-CSRFToken': csrfToken}, body: fd
+  }).then(r => r.json()).then(d => {
+    document.getElementById('ieSaving').style.display = 'none';
+    if (d.success) {
+      bootstrap.Modal.getInstance(document.getElementById('inlineEditModal'))?.hide();
+      if (typeof showToast === 'function') showToast('تم التعديل بنجاح', 'success');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      if (typeof showToast === 'function') showToast(d.error || 'حدث خطأ', 'error');
+    }
+  }).catch(() => { document.getElementById('ieSaving').style.display = 'none'; location.reload(); });
+}
+</script>
+{% endblock %}

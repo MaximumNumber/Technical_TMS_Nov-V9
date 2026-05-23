@@ -1,0 +1,66 @@
+<table class="tms-table">
+  <thead>
+    <tr>
+      <th>الأستاذ</th>
+      <th>المادة</th>
+      <th>القسم</th>
+      <th>الموعد الأصلي</th>
+      <th>الموعد المطلوب</th>
+      <th>الملاحظات</th>
+      <th>الحالة</th>
+      <th>التاريخ</th>
+      <th>الإجراءات</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for req in requests %}
+    <tr>
+      <td><span class="fw-semibold" style="color:#0d5263;">{{ req.professor.name }}</span></td>
+      <td style="font-size:0.82rem;">{{ req.course_name }}</td>
+      <td style="font-size:0.8rem;">{{ req.schedule.department.name|default:"—" }}</td>
+      <td style="font-size:0.78rem;color:#5a7a84;">
+        {% if req.original_day %}{{ req.original_day }}{% endif %}
+        {% if req.original_time_start %} {{ req.original_time_start|time:"H:i" }}-{{ req.original_time_end|time:"H:i" }}{% endif %}
+      </td>
+      <td style="font-size:0.78rem;color:#0a3d47;">
+        {{ req.day }}
+        {% if req.time_start %} {{ req.time_start|time:"H:i" }}-{{ req.time_end|time:"H:i" }}{% endif %}
+        {% if req.room %}<br><span style="color:#7a9ba5;"><i class="fas fa-door-open fa-xs"></i> {{ req.room.name }}</span>{% endif %}
+      </td>
+      <td style="font-size:0.78rem;color:#7a9ba5;">{{ req.notes|truncatechars:35|default:"—" }}</td>
+      <td>
+        {% if req.status == "pending" %}<span class="badge-tms badge-pending">قيد الانتظار</span>
+        {% elif req.status == "approved" %}<span class="badge-tms badge-approved">موافق</span>
+        {% else %}<span class="badge-tms badge-rejected">مرفوض</span>{% endif %}
+      </td>
+      <td style="font-size:0.78rem;color:#7a9ba5;">{{ req.created_at|date:"Y-m-d" }}</td>
+      <td>
+        {% if req.status == "pending" %}
+        <div class="d-flex gap-1">
+          <button onclick="openDecide({{ req.pk }}, 'approve', '{{ req.professor.name|escapejs }}', '{{ req.course_name|escapejs }}')"
+                  class="btn btn-xs btn-success" title="موافقة">
+            <i class="fas fa-check"></i>
+          </button>
+          <button onclick="openDecide({{ req.pk }}, 'reject', '{{ req.professor.name|escapejs }}', '{{ req.course_name|escapejs }}')"
+                  class="btn btn-xs btn-danger" title="رفض">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {% else %}
+        <span style="font-size:0.75rem;color:#a0b8c1;">تمت المعالجة</span>
+        {% if req.admin_notes %}<br><small style="color:#8a9ba5;">{{ req.admin_notes|truncatechars:30 }}</small>{% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9">
+        <div class="empty-state">
+          <i class="fas fa-exchange-alt"></i>
+          <p>لا توجد طلبات</p>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}مراجعة الطلب{% endblock %}
+{% block page_title %}مراجعة طلب تغيير الموعد{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,{% if action == 'approve' %}#27ae60,#2ecc71{% else %}#c62828,#e53935{% endif %});"><i class="fas fa-{% if action == 'approve' %}check{% else %}times{% endif %}-circle"></i></div>
+    <div><h4>{% if action == 'approve' %}الموافقة على الطلب{% else %}رفض الطلب{% endif %}</h4></div>
+  </div>
+  <a href="{% url 'cm_requests_list' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>رجوع</a>
+</div>
+<div class="row justify-content-center fade-in-up fade-in-up-1">
+  <div class="col-lg-7">
+    <div class="card" style="border-top:4px solid {% if action == 'approve' %}#2ecc71{% else %}#e74c3c{% endif %};">
+      <div class="card-header" style="background:{% if action == 'approve' %}linear-gradient(135deg,#e8f5e9,#c8e6c9){% else %}linear-gradient(135deg,#fce4ec,#f8bbd0){% endif %};border-bottom:2px solid {% if action == 'approve' %}#a5d6a7{% else %}#f48fb1{% endif %};">
+        <span style="font-weight:700;color:{% if action == 'approve' %}#1b5e20{% else %}#880e4f{% endif %};">
+          <i class="fas fa-{% if action == 'approve' %}check{% else %}times{% endif %}-circle me-2"></i>
+          {% if action == 'approve' %}الموافقة على الطلب{% else %}رفض الطلب{% endif %}
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <div style="font-size:0.8rem;font-weight:600;color:#7a9ba5;margin-bottom:0.75rem;">تفاصيل الطلب</div>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div style="background:#f8fafc;border-radius:10px;padding:0.85rem;border:1px solid #edf0f4;">
+              <div style="font-size:0.72rem;color:#7a9ba5;margin-bottom:0.2rem;">الأستاذ</div>
+              <div style="font-weight:700;color:#0a3341;">{{ request_obj.professor.name }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background:#f8fafc;border-radius:10px;padding:0.85rem;border:1px solid #edf0f4;">
+              <div style="font-size:0.72rem;color:#7a9ba5;margin-bottom:0.2rem;">المادة</div>
+              <div style="font-weight:700;color:#0a3341;">{{ request_obj.course_name }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background:#fce4ec;border-radius:10px;padding:0.85rem;border:1px solid #f48fb1;">
+              <div style="font-size:0.72rem;color:#880e4f;font-weight:600;margin-bottom:0.3rem;">الموعد الأصلي</div>
+              <div style="color:#6a1b2a;">{{ request_obj.original_day|default:"غير محدد" }}</div>
+              {% if request_obj.original_time_start %}<div style="color:#6a1b2a;font-size:0.85rem;">{{ request_obj.original_time_start|time:"H:i" }} - {{ request_obj.original_time_end|time:"H:i" }}</div>{% endif %}
+              {% if request_obj.original_room %}<div style="font-size:0.8rem;color:#6a1b2a;">{{ request_obj.original_room.name }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background:#e8f5e9;border-radius:10px;padding:0.85rem;border:1px solid #a5d6a7;">
+              <div style="font-size:0.72rem;color:#1b5e20;font-weight:600;margin-bottom:0.3rem;">الموعد الجديد المطلوب</div>
+              <div style="color:#1a3d20;">
+                {% with d=request_obj.day %}{% if d == "Saturday" %}السبت{% elif d == "Sunday" %}الأحد{% elif d == "Monday" %}الاثنين{% elif d == "Tuesday" %}الثلاثاء{% elif d == "Wednesday" %}الأربعاء{% elif d == "Thursday" %}الخميس{% endif %}{% endwith %}
+              </div>
+              {% if request_obj.time_start %}<div style="color:#1a3d20;font-size:0.85rem;">{{ request_obj.time_start|time:"H:i" }} - {{ request_obj.time_end|time:"H:i" }}</div>{% endif %}
+              {% if request_obj.room %}<div style="font-size:0.8rem;color:#1a3d20;">{{ request_obj.room.name }}</div>{% endif %}
+            </div>
+          </div>
+          {% if request_obj.notes %}
+          <div class="col-12">
+            <div style="background:#f8fafc;border-radius:10px;padding:0.85rem;border:1px solid #edf0f4;">
+              <div style="font-size:0.72rem;color:#7a9ba5;margin-bottom:0.2rem;">ملاحظات الأستاذ</div>
+              <div style="color:#1a2e35;">{{ request_obj.notes }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">{% if action == "approve" %}ملاحظات (اختياري){% else %}سبب الرفض *{% endif %}</label>
+            <textarea name="admin_notes" class="form-control" rows="3" {% if action == "reject" %}required{% endif %}
+              placeholder="{% if action == 'approve' %}ملاحظات إضافية...{% else %}اذكر سبب الرفض...{% endif %}"></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn px-4" style="background:{% if action == 'approve' %}linear-gradient(135deg,#27ae60,#2ecc71){% else %}linear-gradient(135deg,#c62828,#e53935){% endif %};color:#fff;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-weight:700;">
+              <i class="fas fa-{% if action == 'approve' %}check{% else %}times{% endif %} me-2"></i>{% if action == 'approve' %}موافقة{% else %}رفض{% endif %}
+            </button>
+            <a href="{% url 'cm_requests_list' %}" class="btn btn-outline-secondary px-4">إلغاء</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

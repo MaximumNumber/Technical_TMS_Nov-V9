@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}الأساتذة{% endblock %}
+{% block page_title %}إدارة الأساتذة{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+    <div><h4>أساتذة {{ college.name }}</h4><div class="page-header-sub">إدارة الكوادر التدريسية</div></div>
+  </div>
+  <a href="{% url 'cm_instructor_add' %}" class="btn btn-tms btn-sm"><i class="fas fa-user-plus me-1"></i>إضافة أستاذ</a>
+</div>
+<div class="card fade-in-up fade-in-up-1">
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>#</th><th>الاسم</th><th>اسم المستخدم</th><th>الرتبة العلمية</th><th>البريد</th><th>الإجراءات</th></tr></thead>
+      <tbody>
+        {% for prof in professors %}
+        <tr>
+          <td style="color:#a0b8c1;font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#17616c,#1a7a8a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;">{{ prof.name|first }}</div>
+              <span class="fw-semibold" style="color:#0d5263;">{{ prof.name }}</span>
+            </div>
+          </td>
+          <td><code style="background:#f0f4f8;color:#17616c;border-radius:6px;padding:2px 6px;font-size:0.78rem;">{{ prof.username }}</code></td>
+          <td>
+            {% if prof.position == "بروفيسور" %}<span class="badge-tms badge-danger-soft">{{ prof.position }}</span>
+            {% elif prof.position == "أستاذ" %}<span class="badge-tms badge-primary">{{ prof.position }}</span>
+            {% elif prof.position == "دكتور" %}<span class="badge-tms badge-success-soft">{{ prof.position }}</span>
+            {% else %}<span class="badge-tms">{{ prof.position }}</span>{% endif %}
+          </td>
+          <td style="font-size:0.82rem;color:#5a7a84;">{{ prof.email|default:"—" }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'cm_instructor_edit' prof.pk %}" class="btn btn-icon btn-outline-primary" title="تعديل"><i class="fas fa-edit"></i></a>
+              <a href="{% url 'cm_instructor_delete' prof.pk %}" class="btn btn-icon btn-outline-danger" title="حذف"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><i class="fas fa-chalkboard-teacher"></i><p>لا يوجد أساتذة</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

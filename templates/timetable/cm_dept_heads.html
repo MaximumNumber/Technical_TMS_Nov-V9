@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}رؤساء الأقسام - {{ college.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-bold mb-1" style="color:#0a3d47;">
+        <i class="fas fa-users-cog me-2" style="color:#17616c;"></i>رؤساء الأقسام
+      </h4>
+      <p class="text-muted mb-0 small">{{ college.name }}</p>
+    </div>
+    <a href="{% url 'cm_dept_head_add' %}" class="btn btn-primary" style="background:#17616c;border-color:#17616c;">
+      <i class="fas fa-plus me-1"></i> إضافة رئيس قسم
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+        {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+    <div class="card-header py-3" style="background:linear-gradient(135deg,#0a3341,#17616c);">
+      <h6 class="mb-0 text-white fw-bold"><i class="fas fa-list me-2"></i>قائمة رؤساء الأقسام</h6>
+    </div>
+    <div class="card-body p-0">
+      {% if dept_heads %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead style="background:#f8fbfd;">
+            <tr>
+              <th class="px-4 py-3" style="color:#4a6872;font-size:.8rem;font-weight:700;">#</th>
+              <th class="py-3" style="color:#4a6872;font-size:.8rem;font-weight:700;">الاسم</th>
+              <th class="py-3" style="color:#4a6872;font-size:.8rem;font-weight:700;">اسم المستخدم</th>
+              <th class="py-3" style="color:#4a6872;font-size:.8rem;font-weight:700;">القسم</th>
+              <th class="py-3" style="color:#4a6872;font-size:.8rem;font-weight:700;">البريد الإلكتروني</th>
+              <th class="py-3 text-center" style="color:#4a6872;font-size:.8rem;font-weight:700;">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dh in dept_heads %}
+            <tr>
+              <td class="px-4 text-muted small">{{ forloop.counter }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e8f6f8,#d0eef4);display:flex;align-items:center;justify-content:center;color:#17616c;font-weight:800;font-size:.9rem;">
+                    {{ dh.full_name|first }}
+                  </div>
+                  <span class="fw-600">{{ dh.full_name }}</span>
+                </div>
+              </td>
+              <td><code class="text-muted">{{ dh.username }}</code></td>
+              <td>
+                {% if dh.department %}
+                  <span class="badge" style="background:#e8f6f8;color:#17616c;border-radius:8px;padding:.3rem .7rem;">{{ dh.department.name }}</span>
+                {% else %}
+                  <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+              <td class="text-muted small">{{ dh.email }}</td>
+              <td class="text-center">
+                <form method="post" action="{% url 'cm_dept_head_delete' dh.pk %}" onsubmit="return confirm('هل أنت متأكد من حذف هذا رئيس القسم؟');" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px;">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e8f6f8,#d0eef4);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2rem;color:#17616c;opacity:.6;">
+          <i class="fas fa-users-cog"></i>
+        </div>
+        <h6 class="fw-bold" style="color:#0a3341;">لا يوجد رؤساء أقسام</h6>
+        <p class="text-muted small">أضف رؤساء الأقسام باستخدام زر "إضافة رئيس قسم" أعلاه</p>
+        <a href="{% url 'cm_dept_head_add' %}" class="btn btn-sm btn-primary mt-2" style="background:#17616c;border-color:#17616c;">
+          <i class="fas fa-plus me-1"></i> إضافة رئيس قسم
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load timetable_tags %}
+{% block title %}جميع الجداول{% endblock %}
+{% block page_title %}جميع الجداول الدراسية{% endblock %}
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon"><i class="fas fa-calendar-alt"></i></div>
+    <div><h4>جميع الجداول الدراسية</h4><div class="page-header-sub">عرض وتصفية كل الجداول</div></div>
+  </div>
+</div>
+<div class="card mb-3 fade-in-up">
+  <div class="card-body py-2">
+    <form method="get" class="d-flex gap-2 align-items-end flex-wrap">
+      <div>
+        <label class="form-label" style="font-size:0.78rem;">الكلية</label>
+        <select name="college_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">كل الكليات</option>
+          {% for college in colleges %}
+          <option value="{{ college.pk }}" {% if selected_college == college.pk|stringformat:"s" %}selected{% endif %}>{{ college.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.78rem;">القسم</label>
+        <select name="department_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">كل الأقسام</option>
+          {% for dept in departments %}
+          <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if selected_college or selected_department %}
+      <a href="{% url 'all_schedules_admin' %}" class="btn btn-xs btn-outline-danger align-self-end">إلغاء التصفية</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+<div class="card mb-4 fade-in-up fade-in-up-1">
+  <div class="card-header" style="background:linear-gradient(135deg,#17616c,#1a7a8a);color:#fff;display:flex;align-items:center;justify-content:space-between;">
+    <div><i class="fas fa-chalkboard me-2"></i>جداول المحاضرات</div>
+    <span style="background:rgba(255,255,255,0.15);border-radius:8px;padding:0.2rem 0.7rem;font-size:0.78rem;">{{ lectures|length }}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>المادة</th><th>القسم</th><th>الأستاذ</th><th>السنة/الفصل</th><th>اليوم</th><th>الوقت</th><th>القاعة</th><th>النوع</th></tr></thead>
+      <tbody>
+        {% for s in lectures %}
+        <tr>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ s.course.course_name }}</span></td>
+          <td style="font-size:0.82rem;">{{ s.department.name }}</td>
+          <td style="font-size:0.82rem;">{{ s.professor.name }}</td>
+          <td style="font-size:0.78rem;"><span class="chip">{{ s.period.year.year_name }} / {{ s.period.semester_type }}</span></td>
+          <td><span class="chip">{{ s.day_of_week|day_arabic }}</span></td>
+          <td style="font-size:0.78rem;font-variant-numeric:tabular-nums;">{{ s.start_time|time:"H:i" }}-{{ s.end_time|time:"H:i" }}</td>
+          <td style="font-size:0.82rem;">{{ s.room.name }}</td>
+          <td><span class="badge-tms badge-info-soft">{{ s.get_lecture_type_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state" style="padding:2rem;"><p>لا توجد جداول محاضرات</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="card fade-in-up fade-in-up-2">
+  <div class="card-header" style="background:linear-gradient(135deg,#e67e22,#f39c12);color:#fff;display:flex;align-items:center;justify-content:space-between;">
+    <div><i class="fas fa-flask me-2"></i>جداول المعامل</div>
+    <span style="background:rgba(255,255,255,0.2);border-radius:8px;padding:0.2rem 0.7rem;font-size:0.78rem;">{{ labs|length }}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>المادة</th><th>القسم</th><th>الأستاذ</th><th>اليوم</th><th>الوقت</th><th>المعمل</th><th>المجموعة</th></tr></thead>
+      <tbody>
+        {% for s in labs %}
+        <tr>
+          <td><span class="fw-semibold" style="color:#7a4500;">{{ s.course.course_name }}</span></td>
+          <td style="font-size:0.82rem;">{{ s.department.name }}</td>
+          <td style="font-size:0.82rem;">{{ s.professor.name }}</td>
+          <td><span class="chip">{{ s.day_of_week|day_arabic }}</span></td>
+          <td style="font-size:0.78rem;">{{ s.start_time|time:"H:i" }}-{{ s.end_time|time:"H:i" }}</td>
+          <td style="font-size:0.82rem;">{{ s.hall.name }}</td>
+          <td>{% if s.group_number %}<span class="badge-tms badge-warning-soft">{{ s.group_number }}</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state" style="padding:2rem;"><p>لا توجد جداول معامل</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

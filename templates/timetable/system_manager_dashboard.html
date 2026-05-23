@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}لوحة تحكم مدير النظام{% endblock %}
+{% block page_title %}لوحة التحكم{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="welcome-banner fade-in-up" style="background:linear-gradient(135deg,#071e26,#0d5263,#17616c);border-radius:18px;padding:1.75rem 2rem;margin-bottom:1.75rem;position:relative;overflow:hidden;">
+  <div style="position:absolute;left:-30px;top:-30px;width:200px;height:200px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+  <div style="position:absolute;left:60px;bottom:-40px;width:120px;height:120px;background:rgba(0,201,177,0.08);border-radius:50%;"></div>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3" style="position:relative;z-index:1;">
+    <div>
+      <div style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin-bottom:0.3rem;">مرحباً يا مدير النظام 👋</div>
+      <h3 style="color:#fff;font-weight:900;margin:0;font-size:1.5rem;">لوحة تحكم مدير النظام</h3>
+      <div style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-top:0.25rem;">جامعة السودان للعلوم والتكنولوجيا</div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'analytics_dashboard' %}" class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:10px;font-family:'Tajawal',sans-serif;">
+        <i class="fas fa-chart-bar me-1"></i> التحليلات
+      </a>
+      <a href="{% url 'export_import_page' %}" class="btn btn-sm" style="background:rgba(0,201,177,0.18);color:#00c9b1;border:1px solid rgba(0,201,177,0.3);border-radius:10px;font-family:'Tajawal',sans-serif;">
+        <i class="fas fa-file-export me-1"></i> تصدير
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-3 mb-4">
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up fade-in-up-1">
+    <div class="stat-card sc-teal">
+      <div class="stat-bg-icon"><i class="fas fa-university"></i></div>
+      <div class="stat-icon"><i class="fas fa-university"></i></div>
+      <div class="stat-value">{{ stats.universities }}</div>
+      <div class="stat-label">الجامعات</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up fade-in-up-2">
+    <div class="stat-card sc-orange">
+      <div class="stat-bg-icon"><i class="fas fa-building"></i></div>
+      <div class="stat-icon"><i class="fas fa-building"></i></div>
+      <div class="stat-value">{{ stats.colleges }}</div>
+      <div class="stat-label">الكليات</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up fade-in-up-3">
+    <div class="stat-card sc-green">
+      <div class="stat-bg-icon"><i class="fas fa-sitemap"></i></div>
+      <div class="stat-icon"><i class="fas fa-sitemap"></i></div>
+      <div class="stat-value">{{ stats.departments }}</div>
+      <div class="stat-label">الأقسام</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up fade-in-up-4">
+    <div class="stat-card sc-red">
+      <div class="stat-bg-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+      <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+      <div class="stat-value">{{ stats.professors }}</div>
+      <div class="stat-label">الأساتذة</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up">
+    <div class="stat-card sc-purple">
+      <div class="stat-bg-icon"><i class="fas fa-user-graduate"></i></div>
+      <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+      <div class="stat-value">{{ stats.students }}</div>
+      <div class="stat-label">الطلاب</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up">
+    <div class="stat-card sc-blue">
+      <div class="stat-bg-icon"><i class="fas fa-calendar-week"></i></div>
+      <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
+      <div class="stat-value">{{ stats.lecture_schedules }}</div>
+      <div class="stat-label">المحاضرات المجدولة</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up">
+    <div class="stat-card sc-cyan">
+      <div class="stat-bg-icon"><i class="fas fa-door-open"></i></div>
+      <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+      <div class="stat-value">{{ stats.rooms }}</div>
+      <div class="stat-label">القاعات</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-4 col-sm-6 fade-in-up">
+    <div class="stat-card sc-pink">
+      <div class="stat-bg-icon"><i class="fas fa-exchange-alt"></i></div>
+      <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
+      <div class="stat-value">{{ stats.pending_requests }}</div>
+      <div class="stat-label">طلبات معلقة</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mb-4 fade-in-up">
+  <div class="card-header card-header-light d-flex align-items-center gap-2">
+    <div style="width:28px;height:28px;background:linear-gradient(135deg,#17616c,#1a7a8a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;">
+      <i class="fas fa-bolt"></i>
+    </div>
+    إجراءات سريعة
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'university_add' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-university"></i></div>
+          <div class="qa-label">إضافة جامعة</div>
+        </a>
+      </div>
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'branch_add' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-code-branch"></i></div>
+          <div class="qa-label">إضافة فرع</div>
+        </a>
+      </div>
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'college_add' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-building"></i></div>
+          <div class="qa-label">إضافة كلية</div>
+        </a>
+      </div>
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'room_add_admin' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-door-open"></i></div>
+          <div class="qa-label">إضافة قاعة</div>
+        </a>
+      </div>
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'hall_add_admin' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-flask"></i></div>
+          <div class="qa-label">إضافة معمل</div>
+        </a>
+      </div>
+      <div class="col-xl-2 col-md-3 col-sm-4 col-6">
+        <a href="{% url 'college_manager_add' %}" class="quick-action-card">
+          <div class="qa-icon"><i class="fas fa-user-plus"></i></div>
+          <div class="qa-label">إضافة مدير كلية</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Schedules + Activity Feed side by side -->
+<div class="row g-4">
+{% if recent_schedules %}
+<div class="col-lg-7 fade-in-up">
+<div class="card">
+  <div class="card-header card-header-light d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#17616c,#1a7a8a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-calendar-alt"></i></div>
+      آخر المحاضرات المضافة
+    </div>
+    <a href="{% url 'all_schedules_admin' %}" class="btn btn-sm btn-tms">عرض الكل</a>
+  </div>
+  <div class="table-wrap">
+    <table class="tms-table">
+      <thead><tr><th>المادة</th><th>القسم</th><th>الأستاذ</th><th>اليوم</th><th>الوقت</th></tr></thead>
+      <tbody>
+        {% for s in recent_schedules %}
+        <tr>
+          <td><span class="fw-semibold" style="color:#0d5263;">{{ s.course.course_name }}</span></td>
+          <td>{{ s.department.name }}</td>
+          <td>{{ s.professor.name }}</td>
+          <td><span class="chip">{{ s.get_day_of_week_display }}</span></td>
+          <td><span style="font-variant-numeric:tabular-nums;color:#4a6872;">{{ s.start_time|time:"H:i" }} - {{ s.end_time|time:"H:i" }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-calendar-times"></i><p>لا توجد محاضرات</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endif %}
+
+{% if recent_changelog %}
+<div class="col-lg-5 fade-in-up">
+<div class="card h-100">
+  <div class="card-header card-header-light d-flex align-items-center gap-2">
+    <div style="width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;"><i class="fas fa-history"></i></div>
+    <strong>آخر التغييرات</strong>
+  </div>
+  <div class="card-body py-2 px-3">
+    {% for log in recent_changelog %}
+    <div class="activity-item">
+      <div class="activity-dot {% if log.action == 'add' %}add{% elif log.action == 'edit' %}edit{% else %}delete{% endif %}">
+        <i class="fas {% if log.action == 'add' %}fa-plus{% elif log.action == 'edit' %}fa-pencil-alt{% else %}fa-trash{% endif %}"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="activity-title">{{ log.course_name|default:"—" }}</div>
+        <div class="activity-meta">
+          {{ log.department_name|default:"" }}
+          {% if log.changed_by %} · {{ log.changed_by.full_name }}{% endif %}
+        </div>
+        <div class="activity-meta">{{ log.changed_at|date:"Y-m-d H:i" }}</div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:1.5rem;"><i class="fas fa-clock-rotate-left" style="opacity:0.3;"></i><p>لا توجد تغييرات</p></div>
+    {% endfor %}
+  </div>
+</div>
+</div>
+{% endif %}
+</div>
+{% endblock %}

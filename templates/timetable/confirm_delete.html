@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in-up">
+  <div class="page-header-title">
+    <div class="page-header-icon" style="background:linear-gradient(135deg,#991b1b,#dc2626);">
+      <i class="fas fa-trash-alt"></i>
+    </div>
+    <div>
+      <h4>{{ title }}</h4>
+      <div class="page-header-sub">تأكيد الحذف النهائي</div>
+    </div>
+  </div>
+  <a href="{% url back_url %}" class="btn btn-sm btn-outline-secondary">
+    <i class="fas fa-arrow-right me-1"></i> رجوع
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-xl-5 col-lg-7 col-md-9">
+    <div class="delete-card fade-in-up fade-in-up-1">
+      <div class="delete-header">
+        <div class="del-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h5>{{ title }}</h5>
+      </div>
+      <div class="delete-body">
+        <div class="delete-icon-big">
+          <i class="fas fa-trash-alt"></i>
+        </div>
+        <div class="delete-title">هل أنت متأكد من الحذف؟</div>
+        <div class="delete-desc">أنت على وشك حذف العنصر التالي بشكل نهائي:</div>
+        <div class="delete-object-name">{{ object }}</div>
+        <div class="delete-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع البيانات المرتبطة بهذا العنصر نهائياً.
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="delete-actions">
+            <button type="submit" class="btn-delete-confirm">
+              <i class="fas fa-trash-alt"></i> نعم، احذف نهائياً
+            </button>
+            <a href="{% url back_url %}" class="btn-delete-cancel">
+              <i class="fas fa-times"></i> إلغاء
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
